@@ -57,7 +57,12 @@ var astTransformVisitor = {
     }
 
     // classes
-    
+
+    if (t.isClassDeclaration(node) || t.isClassExpression(node)) {
+      node.name = node.id;
+      delete node.id;
+    }
+
     if (t.isReferencedIdentifier(node, parent, { name: "super" })) {
       return t.inherits(t.thisExpression(), node);
     }
