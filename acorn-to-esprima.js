@@ -7,9 +7,16 @@ exports.toToken = function (token) {
 
   if (type === tokTypes.name) {
     token.type = "Identifier";
-  } else if (type === tokTypes.semi || type === tokTypes.comma || type === tokTypes.parenL || type === tokTypes.parenR || type === tokTypes.braceL || type === tokTypes.braceR) {
+  } else if (type === tokTypes.semi || type === tokTypes.comma || type === tokTypes.parenL || type === tokTypes.parenR || type === tokTypes.braceL || type === tokTypes.braceR || type.isAssign) {
     token.type = "Punctuator";
-    token.value = type.type;
+    if (!token.value) {
+      token.value = type.type;
+    }
+  } else if (type.keyword) {
+    token.type = "Keyword";
+  } else if (type === tokTypes.num) {
+    token.type = "Numeric";
+    token.value = String(token.value);
   }
 
   return token;
@@ -50,7 +57,12 @@ var astTransformVisitor = {
     }
 
     // classes
-    
+
+    if (t.isClassDeclaration(node) || t.isClassExpression(node)) {
+      node.name = node.id;
+      delete node.id;
+    }
+
     if (t.isReferencedIdentifier(node, parent, { name: "super" })) {
       return t.inherits(t.thisExpression(), node);
     }
