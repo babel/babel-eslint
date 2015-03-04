@@ -21,7 +21,7 @@ function monkeypatch() {
 
   var eslintLoc;
   try {
-    eslintLoc = require.resolve("eslint");
+    eslintLoc = Module._resolveFilename("eslint", module.parent);
   } catch (err) {
     throw new ReferenceError("couldn't resolve eslint");
   }
