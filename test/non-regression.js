@@ -78,6 +78,14 @@ describe("verify", function () {
     );
   });
 
+  it("Exported classes should be used (issue #8)", function () {
+    verifyAndAssertMessages(
+      "class Foo {} module.exports = Foo;",
+      { "no-unused-vars": 1 },
+      []
+    );
+  });
+
   it("super keyword in class (issue #10)", function () {
     verifyAndAssertMessages(
       "class Foo { constructor() { super() } }",
@@ -98,6 +106,14 @@ describe("verify", function () {
     verifyAndAssertMessages(
       "module.exports = <div className=\"foo\" />",
       { "no-undef": 1 },
+      []
+    );
+  });
+
+  it("Variables in JSX should be used (issues #15, #17, #21, #29)", function () {
+    verifyAndAssertMessages(
+      "import App from './App'; export default (<App />);",
+      { "no-unused-vars": 1, "no-undef": 1 },
       []
     );
   });
