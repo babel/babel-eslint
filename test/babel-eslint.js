@@ -45,7 +45,10 @@ function assertSameAST(a, b, path) {
 
 function parseAndAssertSame(code) {
     var esAST = espree.parse(code, {
-      ecmaFeatures: { classes: true },
+      ecmaFeatures: {
+        classes: true,
+        jsx: true
+      },
       tokens: true,
       loc: true,
       range: true
@@ -66,6 +69,22 @@ describe("acorn-to-esprima", function () {
 
   it("class expression", function () {
     parseAndAssertSame("var a = class Foo {}");
+  });
+
+  it("jsx expression", function () {
+    parseAndAssertSame("<App />");
+  });
+
+  it("jsx expression with 'this' as identifier", function () {
+    parseAndAssertSame("<this />");
+  });
+
+  it("jsx expression with a dynamic attribute", function () {
+    parseAndAssertSame("<App foo={bar} />");
+  });
+
+  it("jsx expression with a member expression as identifier", function () {
+    parseAndAssertSame("<foo.bar />");
   });
 
 });
