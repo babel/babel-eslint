@@ -6,6 +6,8 @@
 **NOTE:** Please note that this is experimental and may have numerous bugs. It is however
 successfuly linting the [babel core](https://github.com/babel/babel/blob/master/.eslintrc).
 
+> Currently the `ecmaFeatures` options from `eslint` are **not** supported by the `acorn` parser and thus are ignored.
+
 ## How does it work?
 
 ESLint allows custom parsers. This is great but some of the syntax nodes that Babel supports
