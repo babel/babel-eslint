@@ -64,7 +64,7 @@ function monkeypatch() {
   var eslintMod = createModule(eslintLoc);
   var escopeLoc = Module._resolveFilename("escope", eslintMod);
   var escopeMod = createModule(escopeLoc);
-
+  var referencerLoc = Module._resolveFilename("./referencer", escopeMod)
   // monkeypatch estraverse
   var estraverse = escopeMod.require("estraverse");
   assign(estraverse.VisitorKeys, t.VISITOR_KEYS);
