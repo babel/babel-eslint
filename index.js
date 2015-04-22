@@ -6,6 +6,7 @@ var parse          = require("babel-core").parse;
 var path           = require("path");
 var t              = require("babel-core").types;
 
+var estraverse;
 var hasPatched = false;
 
 function createModule(filename) {
@@ -32,7 +33,7 @@ function monkeypatch() {
   var escopeMod = createModule(escopeLoc);
 
   // monkeypatch estraverse
-  var estraverse = escopeMod.require("estraverse");
+  estraverse = escopeMod.require("estraverse");
   assign(estraverse.VisitorKeys, t.VISITOR_KEYS);
 
   // monkeypatch escope
@@ -92,6 +93,7 @@ exports.parse = function (code) {
 
   // add comments
   ast.comments = comments;
+  estraverse.attachComments(ast, comments, tokens);
 
   // transform esprima and acorn divergent nodes
   acornToEsprima.toAST(ast);
