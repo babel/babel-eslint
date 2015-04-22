@@ -52,6 +52,51 @@ function monkeypatch() {
   };
 }
 
+exports.attachComments = function(ast, comments, tokens) {
+  estraverse.attachComments(ast, comments, tokens);
+
+  if (comments.length) {
+    var firstComment = comments[0];
+    var lastComment = comments[comments.length - 1];
+    // fixup program start
+    if (!tokens.length) {
+      // if no tokens, the program starts at the end of the last comment
+      ast.range[0] = lastComment.range[1];
+      ast.loc.start.line = lastComment.loc.end.line;
+      ast.loc.start.column = lastComment.loc.end.column;
+    } else if (firstComment.start < tokens[0].range[0]) {
+      // if there are comments before the first token, the program starts at the first token
+      var token = tokens[0];
+      ast.range[0] = token.range[0];
+      ast.loc.start.line = token.loc.start.line;
+      ast.loc.start.column = token.loc.start.column;
+
+      // estraverse do not put leading comments on first node when the comment
+      // appear before the first token
+      if (ast.body.length) {
+        var node = ast.body[0];
+        node.leadingComments = [];
+        var firstTokenStart = token.range[0];
+        var len = comments.length;
+        for(var i = 0; i < len && comments[i].start < firstTokenStart; i++ ) {
+          node.leadingComments.push(comments[i]);
+        }
+      }
+    }
+    // fixup program end
+    if (tokens.length) {
+      var lastToken = tokens[tokens.length - 1];
+      if (lastComment.end > lastToken.range[1]) {
+        // If there is a comment after the last token, the program ends at the
+        // last token and not the comment
+        ast.range[1] = lastToken.range[1];
+        ast.loc.end.line = lastToken.loc.end.line;
+        ast.loc.end.column = lastToken.loc.end.column;
+      }
+    }
+  }
+};
+
 exports.parse = function (code) {
   try {
     monkeypatch();
@@ -93,7 +138,7 @@ exports.parse = function (code) {
 
   // add comments
   ast.comments = comments;
-  estraverse.attachComments(ast, comments, tokens);
+  exports.attachComments(ast, comments, tokens);
 
   // transform esprima and acorn divergent nodes
   acornToEsprima.toAST(ast);
