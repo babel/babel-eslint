@@ -26,7 +26,7 @@ function assertSameAST(a, b, path) {
 
       // Exception: ignore "end" and "start" outside "loc" properties
       if ((keyA === "end" || keyA === "start") && path[path.length - 1] !== "loc") continue;
-      
+
       // Exception: ignore root "comments" property
       if (keyA === "comments" && path.length === 0) continue;
 
@@ -66,6 +66,10 @@ describe("acorn-to-esprima", function () {
 
   it("class declaration", function () {
     parseAndAssertSame("class Foo {}");
+  });
+
+  it("class properties", function () {
+    parseAndAssertSame("class Foo { a = () => {}; }");
   });
 
   it("class expression", function () {
