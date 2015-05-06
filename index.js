@@ -9,6 +9,40 @@ var t              = require("babel-core").types;
 var estraverse;
 var hasPatched = false;
 
+function defaultOptions() {
+    return {
+        optimistic: false,
+        directive: false,
+        nodejsScope: false,
+        sourceType: "script", // one of ['script', 'module']
+        ecmaVersion: 5
+    };
+}
+
+function updateDeeply(target, override) {
+    var key, val;
+
+    function isHashObject(target) {
+        return typeof target === "object" && target instanceof Object && !(target instanceof RegExp);
+    }
+
+    for (key in override) {
+        if (override.hasOwnProperty(key)) {
+            val = override[key];
+            if (isHashObject(val)) {
+                if (isHashObject(target[key])) {
+                    updateDeeply(target[key], val);
+                } else {
+                    target[key] = updateDeeply({}, val);
+                }
+            } else {
+                target[key] = val;
+            }
+        }
+    }
+    return target;
+}
+
 function createModule(filename) {
   var mod = new Module(filename);
   mod.filename = filename;
@@ -31,14 +65,16 @@ function monkeypatch() {
   var eslintMod = createModule(eslintLoc);
   var escopeLoc = Module._resolveFilename("escope", eslintMod);
   var escopeMod = createModule(escopeLoc);
-
+  var referencerLoc = Module._resolveFilename("./referencer", escopeMod)
   // monkeypatch estraverse
   estraverse = escopeMod.require("estraverse");
   assign(estraverse.VisitorKeys, t.VISITOR_KEYS);
 
+  // monkeypath referencer
+  var Referencer = escopeMod.require("./referencer");
+
   // monkeypatch escope
   var escope  = require(escopeLoc);
-  var analyze = escope.analyze;
   escope.analyze = function (ast, opts) {
     opts.ecmaVersion = 6;
     opts.sourceType = "module";
@@ -46,9 +82,32 @@ function monkeypatch() {
     // eslint rules.
     var TypeAliasKeys = estraverse.VisitorKeys.TypeAlias;
     estraverse.VisitorKeys.TypeAlias = [];
-    var results = analyze.call(this, ast, opts);
+
+    var options = updateDeeply(defaultOptions(), opts);
+
+    var scopeManager = new escope.ScopeManager(options);
+
+    var referencer = new Referencer(scopeManager);
+
+    // Make sure the decorators are visited
+    var originalVisitClass = referencer.visitClass;
+
+    referencer.visitClass = function visitClass(node) {
+        if(node.decorators){
+          for (var i in node.decorators) {
+            if(node.decorators[i].expression) {
+              this.visit(node.decorators[i]);
+            }
+          }
+        }
+        originalVisitClass.call(this, node);
+      }.bind(referencer);
+
+
+
+    referencer.visit(ast);
     estraverse.VisitorKeys.TypeAlias = TypeAliasKeys;
-    return results;
+    return scopeManager;
   };
 }
 
