@@ -139,4 +139,12 @@ describe("verify", function () {
       []
     );
   });
+
+  it("flow import types", function() {
+    verifyAndAssertMessages(
+      "import type Foo from 'foo';",
+      { "no-unused-vars": 1 },
+      []
+    );
+  });
 });
