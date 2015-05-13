@@ -84,6 +84,9 @@ var astTransformVisitor = {
     // modules
 
     if (t.isImportDeclaration(node)) {
+      if (node.isType) {
+        return this.remove();
+      }
       delete node.isType;
     }
 
