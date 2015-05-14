@@ -33,7 +33,12 @@ function assertImplementsAST(target, source, path) {
 
 function parseAndAssertSame(code) {
   var esAST = espree.parse(code, {
+    env: {
+      "es6": true,
+      "node": true
+    },
     ecmaFeatures: {
+      blockBindings: true,
       templateStrings: true,
       modules: true,
       classes: true,
@@ -102,6 +107,22 @@ describe("acorn-to-esprima", function () {
 
     it("template with nested function/object", function () {
       parseAndAssertSame("`outer${{x: {y: 10}}}bar${`nested${function(){return 1;}}endnest`}end`");
+    });
+
+    it("template with braces inside and outside of template string #96", function () {
+      parseAndAssertSame("if (a) { var target = `{}a:${webpackPort}{}}}}`; } else { app.use(); }");
+    });
+
+    it("template also with braces #96", function () {
+      parseAndAssertSame(
+        "export default function f1() {" +
+          "function f2(foo) {" +
+            "const bar = 3;" +
+            "return `${foo} ${bar}`;" +
+          "}" +
+          "return f2;" +
+        "}"
+      );
     });
   });
 
