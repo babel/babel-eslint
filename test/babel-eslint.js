@@ -224,4 +224,20 @@ describe("acorn-to-esprima", function () {
       " */"
     ].join("\n"));
   });
+
+  it("null", function () {
+    parseAndAssertSame("null");
+  });
+
+  it("boolean", function () {
+    parseAndAssertSame("if (true) {} else if (false) {}");
+  });
+
+  it("regexp", function () {
+    parseAndAssertSame("/affix-top|affix-bottom|affix|[a-z]/");
+  });
+
+  it("regexp in a template string", function () {
+    parseAndAssertSame("`${/\\d/.exec(\"1\")[0]}`");
+  });
 });
