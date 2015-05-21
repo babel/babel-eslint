@@ -76,18 +76,89 @@ function monkeypatch() {
     }
   }
 
-  // monkeypatch referencer methods to visit decorators
+  // visit decorators that are in: ClassDeclaration / ClassExpression
   var visitClass = referencer.prototype.visitClass;
   referencer.prototype.visitClass = function (node) {
-    // visit decorators that are in: Class Declaration
     visitDecorators.call(this, node);
     visitClass.call(this, node);
   }
+  // visit decorators that are in: Property / MethodDefinition
   var visitProperty = referencer.prototype.visitProperty;
   referencer.prototype.visitProperty = function (node) {
-    // visit decorators that are in: Visit Property / MethodDefinition
     visitDecorators.call(this, node);
     visitProperty.call(this, node);
+  }
+
+  function visitTypeAnnotation(node) {
+    // visit function type parameters
+    if (node.typeParameters) {
+      node.typeParameters.params.forEach(function (p) {
+        if (p.type === 'Identifier') {
+          this.visit(p);
+        } else {
+          visitTypeAnnotation.call(this, p);
+        }
+      }.bind(this));
+    }
+
+    // visit function parameters
+    if (node.params) {
+      for (var i = 0; i < node.params.length; i++) {
+        visitTypeAnnotation.call(this, node.params[i]);
+      }
+    }
+
+    // visit return type
+    if (node.returnType) {
+      visitTypeAnnotation.call(this, node.returnType);
+    }
+
+    // visit type
+    if (node.typeAnnotation) {
+      visitTypeAnnotation.call(this, node.typeAnnotation);
+    }
+
+    // visit rest
+    if (t.isFunctionTypeAnnotation(node) && node.rest) {
+      visitTypeAnnotation.call(this, node.rest);
+    }
+
+    // object properties - properties
+    if (t.isObjectTypeAnnotation(node) && node.properties) {
+      for (var i = 0; i < node.properties.length; i++) {
+        visitTypeAnnotation.call(this, node.properties[i].value);
+      }
+    }
+
+    // object properties - indexers
+    if (t.isObjectTypeAnnotation(node) && node.indexers) {
+      for (var i = 0; i < node.indexers.length; i++) {
+        visitTypeAnnotation.call(this, node.indexers[i].key);
+        visitTypeAnnotation.call(this, node.indexers[i].value);
+      }
+    }
+
+    if (node.id) {
+      this.visit(node.id);
+    }
+  }
+
+  // visit flow type in FunctionDeclaration, FunctionExpression, ArrowFunctionExpression
+  var visitFunction = referencer.prototype.visitFunction;
+  referencer.prototype.visitFunction = function (node) {
+    visitTypeAnnotation.call(this, node);
+    visitFunction.call(this, node);
+  }
+
+  // visit flow type in VariableDeclaration
+  var variableDeclaration = referencer.prototype.VariableDeclaration;
+  referencer.prototype.VariableDeclaration = function (node) {
+    if (node.declarations) {
+      node.declarations.forEach(function (d) {
+        visitTypeAnnotation.call(this, d.id);
+      }.bind(this));
+    }
+    variableDeclaration.call(this, node);
   }
 }
 

@@ -124,20 +124,82 @@ describe("verify", function () {
     );
   });
 
-  it("flow type", function () {
-    verifyAndAssertMessages(
-      "type SomeNewType = any;",
-      {},
-      []
-    );
-  });
+  describe("flow", function () {
+    it("type alias", function () {
+      verifyAndAssertMessages(
+        "type SomeNewType = any;",
+        {},
+        []
+      );
+    });
 
-  it("type cast expression #102", function () {
-    verifyAndAssertMessages(
-      "for (let a of (a: Array)) {}",
-      {},
-      []
-    );
+    it("type cast expression #102", function () {
+      verifyAndAssertMessages(
+        "for (let a of (a: Array)) {}",
+        {},
+        []
+      );
+    });
+
+    it("multiple nullable type annotations and return #108", function () {
+      verifyAndAssertMessages([
+          "import type Foo from 'foo';",
+          "import type Foo2 from 'foo';",
+          "import type Foo3 from 'foo';",
+          "function log(foo: ?Foo, foo2: ?Foo2): ?Foo3 {",
+            "console.log(foo, foo2);",
+          "}",
+          "log(1, 2);"
+        ].join("\n"),
+        { "no-unused-vars": 1, "no-undef": 1 },
+        []
+      );
+    });
+
+    it("type parameters #108", function () {
+      verifyAndAssertMessages([
+          "import type Foo from 'foo';",
+          "import type Foo2 from 'foo';",
+          "function log<Foo, Foo2>() {}",
+        ].join("\n"),
+        { "no-unused-vars": 1, "no-undef": 1 },
+        []
+      );
+    });
+
+    it("nested type annotations #108", function () {
+      verifyAndAssertMessages([
+          "import type Foo from 'foo';",
+          "function foo(callback: () => Foo){",
+            "return callback();",
+          "}"
+        ].join("\n"),
+        { "no-unused-vars": 1, "no-undef": 1 },
+        []
+      );
+    });
+
+    it("type in var declaration #108", function () {
+      verifyAndAssertMessages([
+          "import type Foo from 'foo';",
+          "var x: Foo = 1;",
+          "x;"
+        ].join("\n"),
+        { "no-unused-vars": 1, "no-undef": 1 },
+        []
+      );
+    });
+
+    it("object type annotation #108", function () {
+      verifyAndAssertMessages([
+          "import type Foo from 'foo';",
+          "var a: {numVal: Foo};",
+          "a;"
+        ].join("\n"),
+        { "no-unused-vars": 1, "no-undef": 1},
+        []
+      );
+    });
   });
 
   it("class usage", function () {
