@@ -125,10 +125,19 @@ describe("verify", function () {
   });
 
   describe("flow", function () {
+    it("check regular function", function () {
+      verifyAndAssertMessages([
+          "function a(b, c) { b += 1; c += 1; } a;",
+        ].join("\n"),
+        { "no-unused-vars": 1, "no-undef": 1},
+        []
+      );
+    });
+
     it("type alias", function () {
       verifyAndAssertMessages(
         "type SomeNewType = any;",
-        {},
+        { "no-undef": 1 },
         []
       );
     });
@@ -156,30 +165,32 @@ describe("verify", function () {
       );
     });
 
-    it("type parameters #108", function () {
+    it("type parameters", function () {
       verifyAndAssertMessages([
           "import type Foo from 'foo';",
           "import type Foo2 from 'foo';",
           "function log<Foo, Foo2>() {}",
+          "log();"
         ].join("\n"),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
-    it("nested type annotations #108", function () {
+    it("nested type annotations", function () {
       verifyAndAssertMessages([
           "import type Foo from 'foo';",
-          "function foo(callback: () => Foo){",
+          "function foo(callback: () => Foo) {",
             "return callback();",
-          "}"
+          "}",
+          "foo();"
         ].join("\n"),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
-    it("type in var declaration #108", function () {
+    it("type in var declaration", function () {
       verifyAndAssertMessages([
           "import type Foo from 'foo';",
           "var x: Foo = 1;",
@@ -190,11 +201,71 @@ describe("verify", function () {
       );
     });
 
-    it("object type annotation #108", function () {
+    it("object type annotation", function () {
       verifyAndAssertMessages([
           "import type Foo from 'foo';",
           "var a: {numVal: Foo};",
           "a;"
+        ].join("\n"),
+        { "no-unused-vars": 1, "no-undef": 1},
+        []
+      );
+    });
+
+    it("object property types", function () {
+      verifyAndAssertMessages([
+          "var a = {",
+            "circle: (null : ?{ setNativeProps(props: Object): void })",
+          "};",
+          "a;"
+        ].join("\n"),
+        { "no-unused-vars": 1, "no-undef": 1},
+        []
+      );
+    });
+
+    it("namespaced types", function () {
+      verifyAndAssertMessages([
+          "var React = require('react-native');",
+          "var b = {",
+            "openExternalExample: (null: ?React.Component)",
+          "};",
+          "var c = {",
+            "render(): React.Component {}",
+          "};",
+          "b;",
+          "c;"
+        ].join("\n"),
+        { "no-unused-vars": 1, "no-undef": 1},
+        []
+      );
+    });
+
+    it("ArrayTypeAnnotation", function () {
+      verifyAndAssertMessages([
+          "import type Foo from 'foo';",
+          "var x: Foo[]; x;"
+        ].join("\n"),
+        { "no-unused-vars": 1, "no-undef": 1},
+        []
+      );
+    });
+
+    it("ClassImplements", function () {
+      verifyAndAssertMessages([
+          "import type Foo from 'foo';",
+          "import type Bar from 'foo';",
+          "class Foo implements Bar {}"
+        ].join("\n"),
+        { "no-unused-vars": 1, "no-undef": 1},
+        []
+      );
+    });
+
+    it("type alias creates declaration + usage", function () {
+      verifyAndAssertMessages([
+          "type Foo = any;",
+          "var x : Foo = 1; x;"
         ].join("\n"),
         { "no-unused-vars": 1, "no-undef": 1},
         []

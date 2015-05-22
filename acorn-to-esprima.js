@@ -117,7 +117,7 @@ function convertTemplateType(tokens) {
   // create Template token
   function replaceWithTemplateType(start, end) {
     var templateToken = {
-      type: 'Template',
+      type: "Template",
       value: createTemplateValue(start, end),
       range: [tokens[start].start, tokens[end].end],
       loc: {
@@ -183,16 +183,21 @@ var astTransformVisitor = {
       delete node.argument;
     }
 
+    if (this.isRestElement()) {
+      return node.argument;
+    }
+
     if (this.isTypeCastExpression()) {
       return node.expression;
     }
 
-    if (this.isFlow()) {
-      return this.remove();
-    }
+    // flow
 
-    if (this.isRestElement()) {
-      return node.argument;
+    if (this.isDeclareModule() ||
+        this.isDeclareClass() ||
+        this.isDeclareFunction() ||
+        this.isDeclareVariable()) {
+      return this.remove();
     }
 
     // modules
