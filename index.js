@@ -65,7 +65,7 @@ function monkeypatch() {
   var referencerMod = createModule(referencerLoc);
   var referencer = require(referencerLoc);
 
-  // reference Defition
+  // reference Definition
   var definitionLoc;
   try {
     var definitionLoc = Module._resolveFilename("./definition", referencerMod);
@@ -86,70 +86,108 @@ function monkeypatch() {
     }
   }
 
+  // part of t.VISITOR_KEYS;
+  var visitorKeysMap = {
+    // Others
+    "ArrayPattern":               ["elements", "typeAnnotation"],
+    "ClassDeclaration":           ["id", "body", "superClass", "typeParameters", "superTypeParameters", "implements", "decorators"],
+    "ClassExpression":            ["id", "body", "superClass", "typeParameters", "superTypeParameters", "implements", "decorators"],
+    "FunctionDeclaration":        ["id", "params", "body", "returnType", "typeParameters"],
+    "FunctionExpression":         ["id", "params", "body", "returnType", "typeParameters"],
+    "Identifier":                 ["typeAnnotation"],
+    "ObjectPattern":              ["properties", "typeAnnotation"],
+    "RestElement":                ["argument", "typeAnnotation"],
+
+    // Flow specific
+    "ArrayTypeAnnotation":        ["elementType"],
+    "ClassImplements":            ["id", "typeParameters"],
+    "ClassProperty":              ["key", "value", "typeAnnotation", "decorators"],
+    "DeclareClass":               ["id", "typeParameters", "extends", "body"],
+    "DeclareFunction":            ["id"],
+    "DeclareModule":              ["id", "body"],
+    "DeclareVariable":            ["id"],
+    "FunctionTypeAnnotation":     ["typeParameters", "params", "rest", "returnType"],
+    "FunctionTypeParam":          ["name", "typeAnnotation"],
+    "GenericTypeAnnotation":      ["id", "typeParameters"],
+    "InterfaceExtends":           ["id", "typeParameters"],
+    "InterfaceDeclaration":       ["id", "typeParameters", "extends", "body"],
+    "IntersectionTypeAnnotation": ["types"],
+    "NullableTypeAnnotation":     ["typeAnnotation"],
+    "TupleTypeAnnotation":        ["types"],
+    "TypeofTypeAnnotation":       ["argument"],
+    "TypeAlias":                  ["id", "typeParameters", "right"],
+    "TypeAnnotation":             ["typeAnnotation"],
+    "TypeCastExpression":         ["expression", "typeAnnotation"],
+    "TypeParameterDeclaration":   ["params"],
+    "TypeParameterInstantiation": ["params"],
+    "ObjectTypeAnnotation":       ["properties", "indexers", "callProperties"],
+    "ObjectTypeCallProperty":     ["value"],
+    "ObjectTypeIndexer":          ["id", "key", "value"],
+    "ObjectTypeProperty":         ["key", "value"],
+    "QualifiedTypeIdentifier":    ["qualification"], // don't check "id"?
+    "UnionTypeAnnotation":        ["types"]
+  };
+
+  var propertyTypes = {
+    // loops
+    callProperties: { type: "loop", values: ["value"] },
+    indexers: { type: "loop", values: ["key", "value"] },
+    properties: { type: "loop", values: ["value"] },
+    types: { type: "loop" },
+    params: { type: "loop" },
+    // single property
+    argument: { type: "single" },
+    elementType: { type: "single" },
+    qualification: { type: "single" },
+    rest: { type: "single" },
+    returnType: { type: "single" },
+    // others
+    typeAnnotation: { type: "typeAnnotation" },
+    typeParameters: { type: "typeParameters" },
+    id: { type: "id" }
+  };
+
   function visitTypeAnnotation(node) {
-    if (node.typeParameters) {
-      node.typeParameters.params.forEach(function(p) {
-        checkIdentifierOrVisit.call(this, p);
-      }.bind(this));
-    } else if (t.isTypeAnnotation(node) || node.typeAnnotation) {
-      visitTypeAnnotation.call(this, node.typeAnnotation);
-    } else if (t.isArrayTypeAnnotation(node)) {
-      checkIdentifierOrVisit.call(this, node.elementType);
-    } else if (t.isFunctionTypeAnnotation(node)) {
-      if (node.returnType) {
-        checkIdentifierOrVisit.call(this, node.returnType);
+    // get property to check (params, id, etc...)
+    var visitorValues = visitorKeysMap[node.type];
+    if (!visitorValues) {
+      return;
+    }
+
+    // can have multiple properties
+    for (var i = 0; i < visitorValues.length; i++) {
+      var visitorValue = visitorValues[i];
+      var propertyType = propertyTypes[visitorValue];
+      var nodeProperty = node[visitorValue];
+      // check if property or type is defined
+      if (!propertyType || !nodeProperty) {
+        continue;
       }
-      if (node.rest) {
-        checkIdentifierOrVisit.call(this, node.rest);
-      }
-      if (node.params) {
-        node.params.forEach(function(p) {
-          checkIdentifierOrVisit.call(this, p);
-        }.bind(this));
-      }
-    } else if (t.isGenericTypeAnnotation(node)) {
-      if (node.id) {
+      if (propertyType.type === "loop") {
+        for (var j = 0; j < nodeProperty.length; j++) {
+          if (Array.isArray(propertyType.values)) {
+            for (var k = 0; k < propertyType.values.length; k++) {
+              checkIdentifierOrVisit.call(this, nodeProperty[j][propertyType.values[k]]);
+            }
+          } else {
+            checkIdentifierOrVisit.call(this, nodeProperty[j]);
+          }
+        }
+      } else if (propertyType.type === "single") {
+        checkIdentifierOrVisit.call(this, nodeProperty);
+      } else if (propertyType.type === "typeAnnotation") {
+        visitTypeAnnotation.call(this, node.typeAnnotation);
+      } else if (propertyType.type === "typeParameters") {
+        for (var j = 0; j < node.typeParameters.params.length; j++) {
+          checkIdentifierOrVisit.call(this, node.typeParameters.params[j]);
+        }
+      } else if (propertyType.type === "id") {
         if (node.id.type === "Identifier") {
           checkIdentifierOrVisit.call(this, node.id);
         } else {
           visitTypeAnnotation.call(this, node.id);
         }
-      } else if (node.typeParameters) {
-        checkIdentifierOrVisit.call(this, node.typeParameters);
       }
-    } else if (t.isObjectTypeAnnotation(node)) {
-      if (node.callProperties) {
-        node.callProperties.forEach(function(p) {
-          checkIdentifierOrVisit.call(this, p.value);
-        }.bind(this));
-      }
-      if (node.indexers) {
-        node.indexers.forEach(function(p) {
-          checkIdentifierOrVisit.call(this, p.key);
-          checkIdentifierOrVisit.call(this, p.value);
-        }.bind(this));
-      }
-      if (node.properties) {
-        node.properties.forEach(function(p) {
-          checkIdentifierOrVisit.call(this, p.value);
-        }.bind(this));
-      }
-    } else if (t.isQualifiedTypeIdentifier(node)) {
-      // only visit node.qualification, not node.id
-      checkIdentifierOrVisit.call(this, node.qualification);
-    } else if (t.isTypeofTypeAnnotation(node)) {
-      checkIdentifierOrVisit.call(this, node.argument);
-    } else if (t.isTypeParameterDeclaration(node) ||
-               t.isTypeParameterInstantiation(node)) {
-      node.params.forEach(function(p) {
-        checkIdentifierOrVisit.call(this, p);
-      }.bind(this));
-    } else if (t.isIntersectionTypeAnnotation(node) ||
-               t.isTupleTypeAnnotation(node) ||
-               t.isUnionTypeAnnotation(node)) {
-      node.types.forEach(function(t) {
-        checkIdentifierOrVisit.call(this, t);
-      }.bind(this));
     }
   }
 
