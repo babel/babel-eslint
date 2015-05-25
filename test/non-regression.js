@@ -914,6 +914,40 @@ describe("verify", function () {
     );
   });
 
+  describe("comprehensions", function () {
+    it("array #9", function () {
+      verifyAndAssertMessages(
+        "let b = [for (e of a) String(e)];",
+        { "no-undef": 1 },
+        []
+      );
+    });
+
+    it("array, if statement, multiple blocks", function () {
+      verifyAndAssertMessages(
+        "[for (x of array) for (y of array2) if (x === true) x];",
+        { "no-undef": 1 },
+        []
+      );
+    });
+
+    it("expression, if statement, multiple blocks", function () {
+      verifyAndAssertMessages(
+        "(for (x of array) for (y of array2) if (x === true) x)",
+        { "no-undef": 1 },
+        []
+      );
+    });
+
+    it("ArrayPattern", function () {
+      verifyAndAssertMessages(
+        "[for ([,x] of array) for ({[start.x]: x, [start.y]: y} of array2) x]",
+        { "no-undef": 1 },
+        []
+      );
+    });
+  });
+
   describe("decorators #72", function () {
     it("class declaration", function () {
       verifyAndAssertMessages(

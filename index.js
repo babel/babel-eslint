@@ -198,7 +198,7 @@ function monkeypatch() {
     // visit decorators that are in: Property / MethodDefinition
   var visitProperty = referencer.prototype.visitProperty;
   referencer.prototype.visitProperty = function(node) {
-    if (node.value.type === 'TypeCastExpression') {
+    if (node.value.type === "TypeCastExpression") {
       visitTypeAnnotation.call(this, node.value);
     }
     visitDecorators.call(this, node);
@@ -238,24 +238,42 @@ function monkeypatch() {
     variableDeclaration.call(this, node);
   };
 
-  referencer.prototype.TypeAlias = function(node) {
-    this.currentScope().__define(
-      node.id,
+  function createScopeVariable (node, name) {
+    this.currentScope().variableScope.__define(name,
       new Definition(
-          "Variable",
-          node.id,
-          node,
-          null,
-          null,
-          null
+        "Variable",
+        name,
+        node,
+        null,
+        null,
+        null
       )
     );
+  }
+
+  referencer.prototype.TypeAlias = function(node) {
+    createScopeVariable.call(this, node, node.id);
     if (node.right) {
       visitTypeAnnotation.call(this, node.right);
     }
     if (node.typeParameters) {
       for (var i = 0; i < node.typeParameters.params.length; i++) {
         checkIdentifierOrVisit.call(this, node.typeParameters.params[i]);
+      }
+    }
+  }
+
+  referencer.prototype.ComprehensionBlock = function(node) {
+    var left = node.left;
+    if (left) {
+      if (left.type === "Identifier") {
+        createScopeVariable.call(this, node, left);
+      } else if (left.type === "ArrayPattern") {
+        for (var i = 0; i < left.elements.length; i++) {
+          if (left.elements[i]) {
+            createScopeVariable.call(this, left.elements, left.elements[i]);
+          }
+        }
       }
     }
   }
