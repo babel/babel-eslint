@@ -211,19 +211,19 @@ function monkeypatch() {
     }
     // visit flow type: ClassImplements
     if (node.implements) {
-      node.implements.forEach(function(i) {
-        checkIdentifierOrVisit.call(this, i);
-      }.bind(this));
+      for (var i = 0; i < node.implements.length; i++) {
+        checkIdentifierOrVisit.call(this, node.implements[i]);
+      }
     }
     if (node.typeParameters) {
-      node.typeParameters.params.forEach(function(p) {
-        checkIdentifierOrVisit.call(this, p);
-      }.bind(this));
+      for (var i = 0; i < node.typeParameters.params.length; i++) {
+        checkIdentifierOrVisit.call(this, node.typeParameters.params[i]);
+      }
     }
     if (node.superTypeParameters) {
-      node.superTypeParameters.params.forEach(function(p) {
-        checkIdentifierOrVisit.call(this, p);
-      }.bind(this));
+      for (var i = 0; i < node.superTypeParameters.params.length; i++) {
+        checkIdentifierOrVisit.call(this, node.superTypeParameters.params[i]);
+      }
     }
     visitClass.call(this, node);
   };
@@ -242,16 +242,16 @@ function monkeypatch() {
     }
     // only visit if function parameters have types
     if (node.params) {
-      node.params.forEach(function(p) {
-        if (p.typeAnnotation) {
-          checkIdentifierOrVisit.call(this, p);
+      for (var i = 0; i < node.params.length; i++) {
+        if (node.params[i].typeAnnotation) {
+          checkIdentifierOrVisit.call(this, node.params[i]);
         }
-      }.bind(this));
+      }
     }
     if (node.typeParameters) {
-      node.typeParameters.params.forEach(function(p) {
-        checkIdentifierOrVisit.call(this, p);
-      }.bind(this));
+      for (var i = 0; i < node.typeParameters.params.length; i++) {
+        checkIdentifierOrVisit.call(this, node.typeParameters.params[i]);
+      }
     }
     visitFunction.call(this, node);
   };
@@ -260,9 +260,9 @@ function monkeypatch() {
   var variableDeclaration = referencer.prototype.VariableDeclaration;
   referencer.prototype.VariableDeclaration = function(node) {
     if (node.declarations) {
-      node.declarations.forEach(function(d) {
-        visitTypeAnnotation.call(this, d.id);
-      }.bind(this));
+      for (var i = 0; i < node.declarations.length; i++) {
+        checkIdentifierOrVisit.call(this, node.declarations[i].id);
+      }
     }
     variableDeclaration.call(this, node);
   };
@@ -279,6 +279,9 @@ function monkeypatch() {
           null
       )
     );
+    if (node.right) {
+      visitTypeAnnotation.call(this, node.right);
+    }
   }
 }
 
