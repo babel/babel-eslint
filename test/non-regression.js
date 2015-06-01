@@ -272,6 +272,29 @@ describe("verify", function () {
       );
     });
 
+    it("type alias with type parameters", function () {
+      verifyAndAssertMessages([
+          "import type Bar from 'foo';",
+          "import type Foo2 from 'foo';",
+          "import type Foo3 from 'foo';",
+          "type Foo<Foo2> = Bar<Foo3>",
+          "var x : Foo = 1; x;"
+        ].join("\n"),
+        { "no-unused-vars": 1, "no-undef": 1 },
+        []
+      );
+    });
+
+    it("export type alias", function () {
+      verifyAndAssertMessages([
+          "import type Foo2 from 'foo';",
+          "export type Foo = Foo2;"
+        ].join("\n"),
+        { "no-unused-vars": 1, "no-undef": 1 },
+        []
+      );
+    });
+
     it("1", function () {
       verifyAndAssertMessages(
         [

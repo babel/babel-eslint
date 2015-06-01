@@ -258,6 +258,11 @@ function monkeypatch() {
     if (node.right) {
       visitTypeAnnotation.call(this, node.right);
     }
+    if (node.typeParameters) {
+      for (var i = 0; i < node.typeParameters.params.length; i++) {
+        checkIdentifierOrVisit.call(this, node.typeParameters.params[i]);
+      }
+    }
   }
 }
 
