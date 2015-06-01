@@ -1,6 +1,7 @@
 var acornToEsprima = require("./acorn-to-esprima");
 var traverse       = require("babel-core").traverse;
 var assign         = require("lodash.assign");
+var pick           = require("lodash.pick");
 var Module         = require("module");
 var parse          = require("babel-core").parse;
 var path           = require("path");
@@ -86,47 +87,22 @@ function monkeypatch() {
     }
   }
 
-  // part of t.VISITOR_KEYS;
-  var visitorKeysMap = {
-    // Others
-    "ArrayPattern":               ["elements", "typeAnnotation"],
-    "ClassDeclaration":           ["id", "body", "superClass", "typeParameters", "superTypeParameters", "implements", "decorators"],
-    "ClassExpression":            ["id", "body", "superClass", "typeParameters", "superTypeParameters", "implements", "decorators"],
-    "FunctionDeclaration":        ["id", "params", "body", "returnType", "typeParameters"],
-    "FunctionExpression":         ["id", "params", "body", "returnType", "typeParameters"],
-    "Identifier":                 ["typeAnnotation"],
-    "ObjectPattern":              ["properties", "typeAnnotation"],
-    "RestElement":                ["argument", "typeAnnotation"],
+  // iterate through part of t.VISITOR_KEYS
+  var visitorKeysMap = pick(t.VISITOR_KEYS, function(k) {
+    return t.FLIPPED_ALIAS_KEYS.Flow.concat([
+      "ArrayPattern",
+      "ClassDeclaration",
+      "ClassExpression",
+      "FunctionDeclaration",
+      "FunctionExpression",
+      "Identifier",
+      "ObjectPattern",
+      "RestElement"
+    ]).indexOf(k) === -1;
+  });
 
-    // Flow specific
-    "ArrayTypeAnnotation":        ["elementType"],
-    "ClassImplements":            ["id", "typeParameters"],
-    "ClassProperty":              ["key", "value", "typeAnnotation", "decorators"],
-    "DeclareClass":               ["id", "typeParameters", "extends", "body"],
-    "DeclareFunction":            ["id"],
-    "DeclareModule":              ["id", "body"],
-    "DeclareVariable":            ["id"],
-    "FunctionTypeAnnotation":     ["typeParameters", "params", "rest", "returnType"],
-    "FunctionTypeParam":          ["name", "typeAnnotation"],
-    "GenericTypeAnnotation":      ["id", "typeParameters"],
-    "InterfaceExtends":           ["id", "typeParameters"],
-    "InterfaceDeclaration":       ["id", "typeParameters", "extends", "body"],
-    "IntersectionTypeAnnotation": ["types"],
-    "NullableTypeAnnotation":     ["typeAnnotation"],
-    "TupleTypeAnnotation":        ["types"],
-    "TypeofTypeAnnotation":       ["argument"],
-    "TypeAlias":                  ["id", "typeParameters", "right"],
-    "TypeAnnotation":             ["typeAnnotation"],
-    "TypeCastExpression":         ["expression", "typeAnnotation"],
-    "TypeParameterDeclaration":   ["params"],
-    "TypeParameterInstantiation": ["params"],
-    "ObjectTypeAnnotation":       ["properties", "indexers", "callProperties"],
-    "ObjectTypeCallProperty":     ["value"],
-    "ObjectTypeIndexer":          ["id", "key", "value"],
-    "ObjectTypeProperty":         ["key", "value"],
-    "QualifiedTypeIdentifier":    ["qualification"], // don't check "id"?
-    "UnionTypeAnnotation":        ["types"]
-  };
+  // don't check "id" to prevent "no-undef" for 'Component' with: 'let x: React.Component'
+  visitorKeysMap.QualifiedTypeIdentifier = ["qualification"];
 
   var propertyTypes = {
     // loops
