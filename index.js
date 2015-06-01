@@ -160,7 +160,7 @@ function monkeypatch() {
       var propertyType = propertyTypes[visitorValue];
       var nodeProperty = node[visitorValue];
       // check if property or type is defined
-      if (!propertyType || !nodeProperty) {
+      if (propertyType == null || nodeProperty == null) {
         continue;
       }
       if (propertyType.type === "loop") {
@@ -196,8 +196,8 @@ function monkeypatch() {
       visitTypeAnnotation.call(this, node.typeAnnotation);
     } else if (node.type === "Identifier") {
       this.visit(node);
-    } else if (node.id && node.id.type === "Identifier") {
-      this.visit(node.id);
+    } else {
+      visitTypeAnnotation.call(this, node);
     }
   }
 
@@ -213,6 +213,16 @@ function monkeypatch() {
     if (node.implements) {
       node.implements.forEach(function(i) {
         checkIdentifierOrVisit.call(this, i);
+      }.bind(this));
+    }
+    if (node.typeParameters) {
+      node.typeParameters.params.forEach(function(p) {
+        checkIdentifierOrVisit.call(this, p);
+      }.bind(this));
+    }
+    if (node.superTypeParameters) {
+      node.superTypeParameters.params.forEach(function(p) {
+        checkIdentifierOrVisit.call(this, p);
       }.bind(this));
     }
     visitClass.call(this, node);
