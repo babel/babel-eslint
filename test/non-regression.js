@@ -214,8 +214,10 @@ describe("verify", function () {
 
     it("object property types", function () {
       verifyAndAssertMessages([
+          "import type Foo from 'foo';",
+          "import type Foo2 from 'foo';",
           "var a = {",
-            "circle: (null : ?{ setNativeProps(props: Object): void })",
+            "circle: (null : ?{ setNativeProps(props: Foo): Foo2 })",
           "};",
           "a;"
         ].join("\n"),

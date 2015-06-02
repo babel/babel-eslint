@@ -47,12 +47,7 @@ function monkeypatch() {
   escope.analyze = function (ast, opts) {
     opts.ecmaVersion = 6;
     opts.sourceType = "module";
-    // Don't visit TypeAlias when analyzing scope, but retain them for other
-    // eslint rules.
-    // var TypeAliasKeys = estraverse.VisitorKeys.TypeAlias;
-    // estraverse.VisitorKeys.TypeAlias = [];
     var results = analyze.call(this, ast, opts);
-    // estraverse.VisitorKeys.TypeAlias = TypeAliasKeys;
     return results;
   };
 
@@ -100,9 +95,6 @@ function monkeypatch() {
       "RestElement"
     ]).indexOf(k) === -1;
   });
-
-  // don't check "id" to prevent "no-undef" for 'Component' with: 'let x: React.Component'
-  visitorKeysMap.QualifiedTypeIdentifier = ["qualification"];
 
   var propertyTypes = {
     // loops
@@ -206,6 +198,9 @@ function monkeypatch() {
     // visit decorators that are in: Property / MethodDefinition
   var visitProperty = referencer.prototype.visitProperty;
   referencer.prototype.visitProperty = function(node) {
+    if (node.value.type === 'TypeCastExpression') {
+      visitTypeAnnotation.call(this, node.value);
+    }
     visitDecorators.call(this, node);
     visitProperty.call(this, node);
   };

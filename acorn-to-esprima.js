@@ -187,8 +187,22 @@ var astTransformVisitor = {
       return node.argument;
     }
 
-    if (this.isTypeCastExpression()) {
-      return node.expression;
+    // prevent "no-undef"
+    // for "Component" in: "let x: React.Component"
+    if (this.isQualifiedTypeIdentifier()) {
+      delete node.id;
+    }
+    // for "b" in: "var a: { b: Foo }"
+    if (this.isObjectTypeProperty()) {
+      delete node.key;
+    }
+    // for "indexer" in: "var a: {[indexer: string]: number}"
+    if (this.isObjectTypeIndexer()) {
+      delete node.id;
+    }
+    // for "param" in: "var a: { func(param: Foo): Bar };"
+    if (this.isFunctionTypeParam()) {
+      delete node.name;
     }
 
     // flow
