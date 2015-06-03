@@ -255,9 +255,8 @@ describe("verify", function () {
 
     it("ClassImplements", function () {
       verifyAndAssertMessages([
-          "import type Foo from 'foo';",
           "import type Bar from 'foo';",
-          "class Foo implements Bar {}"
+          "export default class Foo implements Bar {}"
         ].join("\n"),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
@@ -459,7 +458,7 @@ describe("verify", function () {
         [
           "import type Foo from 'foo';",
           "import type Foo2 from 'foo';",
-          "class Bar {set fooProp(value:Foo):Foo2{ value; }}"
+          "export default class Bar {set fooProp(value:Foo):Foo2{ value; }}"
         ].join("\n"),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
@@ -469,8 +468,8 @@ describe("verify", function () {
     it("15", function () {
       verifyAndAssertMessages(
         [
-          "import type Foo from 'foo';",
-          "class Foo {get fooProp():Foo{}}"
+          "import type Foo2 from 'foo';",
+          "export default class Foo {get fooProp(): Foo2{}}"
         ].join("\n"),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
@@ -581,7 +580,7 @@ describe("verify", function () {
           "import type Foo from 'foo';",
           "import type Foo2 from 'foo';",
           "import Baz from 'foo';",
-          "class Bar<Foo> extends Baz<Foo2> { };"
+          "export default class Bar<Foo> extends Baz<Foo2> { };"
         ].join("\n"),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
@@ -594,7 +593,7 @@ describe("verify", function () {
           "import type Foo from 'foo';",
           "import type Foo2 from 'foo';",
           "import type Foo3 from 'foo';",
-          "class Bar<Foo> { bar<Foo2>():Foo3 { return 42; }}"
+          "export default class Bar<Foo> { bar<Foo2>():Foo3 { return 42; }}"
         ].join("\n"),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
@@ -606,7 +605,7 @@ describe("verify", function () {
         [
           "import type Foo from 'foo';",
           "import type Foo2 from 'foo';",
-          "class Bar { static prop1:Foo; prop2:Foo2; }"
+          "export default class Bar { static prop1:Foo; prop2:Foo2; }"
         ].join("\n"),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
@@ -881,6 +880,19 @@ describe("verify", function () {
     verifyAndAssertMessages(
       "class Lol {} module.exports = Lol;",
       { "no-unused-vars": 1 },
+      []
+    );
+  });
+
+  it("class definition: gaearon/redux#24", function () {
+    verifyAndAssertMessages([
+        "export default function root(stores) {",
+          "return DecoratedComponent => class ReduxRootDecorator {",
+            "a() { DecoratedComponent; }",
+          "};",
+        "}",
+      ].join("\n"),
+      { "no-undef": 1, "no-unused-vars": 1 },
       []
     );
   });

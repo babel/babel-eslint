@@ -173,10 +173,6 @@ function monkeypatch() {
   var visitClass = referencer.prototype.visitClass;
   referencer.prototype.visitClass = function(node) {
     visitDecorators.call(this, node);
-    // visit class
-    if (node.id) {
-      this.visit(node.id);
-    }
     // visit flow type: ClassImplements
     if (node.implements) {
       for (var i = 0; i < node.implements.length; i++) {
