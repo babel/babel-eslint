@@ -918,23 +918,23 @@ describe("verify", function () {
     it("array #9", function () {
       verifyAndAssertMessages(
         "let b = [for (e of a) String(e)];",
-        { "no-undef": 1 },
+        { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("array, if statement, multiple blocks", function () {
       verifyAndAssertMessages(
-        "[for (x of array) for (y of array2) if (x === true) x];",
-        { "no-undef": 1 },
+        "[for (x of array) for (y of array2) if (x === true && y === true) x + y];",
+        { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("expression, if statement, multiple blocks", function () {
       verifyAndAssertMessages(
-        "(for (x of array) for (y of array2) if (x === true) x)",
-        { "no-undef": 1 },
+        "(for (x of array) for (y of array2) if (x === true && y === true) x + y)",
+        { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
@@ -942,7 +942,7 @@ describe("verify", function () {
     it("ArrayPattern", function () {
       verifyAndAssertMessages(
         "[for ([,x] of array) for ({[start.x]: x, [start.y]: y} of array2) x]",
-        { "no-undef": 1 },
+        { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
