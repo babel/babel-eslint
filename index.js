@@ -276,6 +276,9 @@ function monkeypatch() {
         }
       }
     }
+    if (node.right) {
+      this.visit(node.right);
+    }
   }
 }
 

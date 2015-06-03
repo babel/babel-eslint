@@ -916,32 +916,43 @@ describe("verify", function () {
 
   describe("comprehensions", function () {
     it("array #9", function () {
-      verifyAndAssertMessages(
-        "let b = [for (e of a) String(e)];",
+      verifyAndAssertMessages([
+          "let arr = [1, 2, 3];",
+          "let b = [for (e of arr) String(e)];"
+        ].join("\n"),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("array, if statement, multiple blocks", function () {
-      verifyAndAssertMessages(
-        "[for (x of array) for (y of array2) if (x === true && y === true) x + y];",
+      verifyAndAssertMessages([
+          "let arr = [1, 2, 3];",
+          "let arr2 = [1, 2, 3];",
+          "[for (x of arr) for (y of arr2) if (x === true && y === true) x + y];"
+        ].join("\n"),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("expression, if statement, multiple blocks", function () {
-      verifyAndAssertMessages(
-        "(for (x of array) for (y of array2) if (x === true && y === true) x + y)",
+      verifyAndAssertMessages([
+          "let arr = [1, 2, 3];",
+          "let arr2 = [1, 2, 3];",
+          "(for (x of arr) for (y of arr2) if (x === true && y === true) x + y)"
+        ].join("\n"),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("ArrayPattern", function () {
-      verifyAndAssertMessages(
-        "[for ([,x] of array) for ({[start.x]: x, [start.y]: y} of array2) x]",
+      verifyAndAssertMessages([
+          "let arr = [1, 2, 3];",
+          "let arr2 = [1, 2, 3];",
+          "[for ([,x] of arr) for ({[start.x]: x, [start.y]: y} of arr2) x]"
+        ].join("\n"),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
