@@ -340,6 +340,29 @@ describe("verify", function () {
       );
     });
 
+    it("polymorphpic/generic types for type alias #123", function () {
+      verifyAndAssertMessages([
+          "import Bar from './Bar';",
+          "type Foo<T> = Bar<T>; var x: Foo = 1; x++"
+        ].join("\n"),
+        { "no-unused-vars": 1, "no-undef": 1 },
+        []
+      );
+    });
+
+    it("polymorphpic/generic types - outside of fn scope #123", function () {
+      verifyAndAssertMessages([
+          "export function identity<T>(value) {",
+            "var a: T = value; a;",
+          "};",
+          "var b: A = 1; b;",
+          "var c: T = 1; c;"
+        ].join("\n"),
+        { "no-unused-vars": 1, "no-undef": 1 },
+        [ '4:7 "A" is not defined. no-undef' ]
+      );
+    });
+
     it("1", function () {
       verifyAndAssertMessages(
         [

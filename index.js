@@ -158,15 +158,16 @@ function monkeypatch() {
     }
   }
 
-  function checkIdentifierOrVisit(node) {
+  function checkIdentifierOrVisit(node, typeParameters) {
     if (node.typeAnnotation) {
       visitTypeAnnotation.call(this, node.typeAnnotation);
     } else if (node.type === "Identifier") {
       // exception for polymorphic types: <T>, <A>, etc
-      if (node.name.length === 1 && node.name === node.name.toUpperCase()) {
+      if (node.name.length === 1 && node.name === node.name.toUpperCase() && typeParameters) {
         createScopeVariable.call(this, null, node);
+      } else {
+        this.visit(node);
       }
-      this.visit(node);
     } else {
       visitTypeAnnotation.call(this, node);
     }
@@ -184,12 +185,12 @@ function monkeypatch() {
     }
     if (node.typeParameters) {
       for (var j = 0; j < node.typeParameters.params.length; j++) {
-        checkIdentifierOrVisit.call(this, node.typeParameters.params[j]);
+        checkIdentifierOrVisit.call(this, node.typeParameters.params[j], true);
       }
     }
     if (node.superTypeParameters) {
       for (var k = 0; k < node.superTypeParameters.params.length; k++) {
-        checkIdentifierOrVisit.call(this, node.superTypeParameters.params[k]);
+        checkIdentifierOrVisit.call(this, node.superTypeParameters.params[k], true);
       }
     }
     visitClass.call(this, node);
@@ -220,7 +221,7 @@ function monkeypatch() {
     }
     if (node.typeParameters) {
       for (var j = 0; j < node.typeParameters.params.length; j++) {
-        checkIdentifierOrVisit.call(this, node.typeParameters.params[j]);
+        checkIdentifierOrVisit.call(this, node.typeParameters.params[j], true);
       }
     }
     visitFunction.call(this, node);
@@ -266,7 +267,7 @@ function monkeypatch() {
     }
     if (node.typeParameters) {
       for (var i = 0; i < node.typeParameters.params.length; i++) {
-        checkIdentifierOrVisit.call(this, node.typeParameters.params[i]);
+        checkIdentifierOrVisit.call(this, node.typeParameters.params[i], true);
       }
     }
   };
