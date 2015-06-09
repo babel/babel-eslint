@@ -164,7 +164,7 @@ function monkeypatch() {
     } else if (node.type === "Identifier") {
       // exception for polymorphic types: <T>, <A>, etc
       if (node.name.length === 1 && node.name === node.name.toUpperCase()) {
-        return;
+        createScopeVariable.call(this, null, node);
       }
       this.visit(node);
     } else {
