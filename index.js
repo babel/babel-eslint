@@ -300,6 +300,19 @@ function monkeypatch() {
     }
   };
 
+  referencer.prototype.ComprehensionExpression = function(node) {
+    var scope = new escope.Scope(this.scopeManager, "function", this.currentScope(), node, false);
+    this.scopeManager.__nestScope(scope);
+
+    for (var i = 0, l = node.blocks.length; i < l; i++) {
+      this.visit(node.blocks[i]);
+    };
+    this.visit(node.filter);
+    this.visit(node.body);
+
+    this.close(node);
+  }
+
   referencer.prototype.ComprehensionBlock = function(node) {
     var left = node.left;
     if (left) {
