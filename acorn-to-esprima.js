@@ -179,6 +179,8 @@ var astTransformVisitor = {
     node._babelType = node.type;
   },
   exit: function (node) { /* parent */
+    node.range = [node.start, node.end];
+
     if (this.isSpreadProperty()) {
       node.type = "Property";
       node.kind = "init";
