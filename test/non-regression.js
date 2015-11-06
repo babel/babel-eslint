@@ -1219,6 +1219,24 @@ describe("verify", function () {
     });
   });
 
+  it("detects no no-undef on decorated property #204", function () {
+    verifyAndAssertMessages(
+      [
+        "import classMethodDeclarationA from 'decorator';",
+        "import decoratorParameter from 'decorator';",
+        "var obj = {",
+          "@classMethodDeclarationA(decoratorParameter)",
+          "@classMethodDeclarationA",
+          "propertyDeclaration",
+        "};",
+        "obj;"
+      ].join("\n"),
+      { "no-undef": 1 },
+      []
+    );
+  });
+
+
   it("detects minimal no-unused-vars case #120", function () {
     verifyAndAssertMessages(
       "var unused;",
