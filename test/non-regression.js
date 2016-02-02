@@ -1340,13 +1340,12 @@ describe("verify", function () {
     );
   });
 
-  it("", function () {
-
+  it("fixes issues with flow types and ObjectPattern", function () {
     verifyAndAssertMessages([
         "import type Foo from 'bar';",
-        "class Foobar {",
-        "  foo({ bar }: Foo) {}",
-        "  bar({ foo }: Foo) {}",
+        "export default class Foobar {",
+        "  foo({ bar }: Foo) { bar; }",
+        "  bar({ foo }: Foo) { foo; }",
         "}"
       ].join("\n"),
       { "no-unused-vars": 1 },
