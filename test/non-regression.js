@@ -1376,4 +1376,18 @@ describe("verify", function () {
       [ "1:13 \"x\" was used before it was defined no-use-before-define" ]
     )
   });
+
+  it("fixes issues with flow types and ObjectPattern", function () {
+    verifyAndAssertMessages([
+        "import type Foo from 'bar';",
+        "export default class Foobar {",
+        "  foo({ bar }: Foo) { bar; }",
+        "  bar({ foo }: Foo) { foo; }",
+        "}"
+      ].join("\n"),
+      { "no-unused-vars": 1 },
+      []
+    );
+  });
+
 });
