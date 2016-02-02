@@ -295,7 +295,7 @@ function monkeypatch() {
     // set them back to normal...
     estraverses.forEach(function (estraverse) {
       estraverse.VisitorKeys.ObjectPattern = t.VISITOR_KEYS.ObjectPattern;
-      estraverse.VisitorKeys.ObjectPattern = t.VISITOR_KEYS.ArrayPattern;
+      estraverse.VisitorKeys.ArrayPattern = t.VISITOR_KEYS.ArrayPattern;
     });
     if (typeParamScope) {
       this.close(node);
