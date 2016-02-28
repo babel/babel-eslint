@@ -32,6 +32,13 @@ function assertImplementsAST(target, source, path) {
   }
 }
 
+function lookup(obj, keypath, backwardsDepth) {
+  if (!keypath) { return obj; }
+
+  return keypath.split('.').slice(0, -1 * backwardsDepth)
+  .reduce((base, segment) => base && base[segment], obj);
+}
+
 function parseAndAssertSame(code) {
   var esAST = espree.parse(code, {
     ecmaFeatures: {
@@ -56,17 +63,24 @@ function parseAndAssertSame(code) {
   try {
     assertImplementsAST(esAST, babylonAST);
   } catch(err) {
-    // err.message +=
-    //   "\nespree:\n" +
-    //   util.inspect(esAST, {depth: err.depth, colors: true}) +
-    //   "\nbabel-eslint:\n" +
-    //   util.inspect(babylonAST, {depth: err.depth, colors: true});
+    var traversal = err.message.slice(3, err.message.indexOf(':'));
+    if (esAST.tokens) {
+      delete esAST.tokens;
+    }
+    if (babylonAST.tokens) {
+      delete babylonAST.tokens;
+    }
+    err.message +=
+      "\nespree:\n" +
+      util.inspect(lookup(esAST, traversal, 2), {depth: err.depth, colors: true}) +
+      "\nbabel-eslint:\n" +
+      util.inspect(lookup(babylonAST, traversal, 2), {depth: err.depth, colors: true});
     throw err;
   }
   // assert.equal(esAST, babylonAST);
 }
 
-describe("acorn-to-esprima", function () {
+describe.only("acorn-to-esprima", function () {
   describe("templates", function () {
     it("empty template string", function () {
       parseAndAssertSame("``");
@@ -380,7 +394,7 @@ describe("acorn-to-esprima", function () {
     it("do not allow import export everywhere", function() {
       assert.throws(function () {
         parseAndAssertSame("function F() { import a from \"a\"; }");
-      }, /Illegal import declaration/)
+      }, /SyntaxError: 'import' and 'export' may only appear at the top level/)
     });
 
     it("return outside function", function () {
@@ -391,7 +405,7 @@ describe("acorn-to-esprima", function () {
       parseAndAssertSame("function F() { super(); }");
     });
 
-    it("StringLiteral", function () {
+    it.only("StringLiteral", function () {
       parseAndAssertSame('');
       parseAndAssertSame("");
       parseAndAssertSame("a");

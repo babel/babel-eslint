@@ -1,4 +1,4 @@
-var acornToEsprima = require("acorn-to-esprima");
+var babylonToEspree = require("./babylon-to-espree");
 var assign         = require("lodash.assign");
 var pick           = require("lodash.pick");
 var Module         = require("module");
@@ -437,13 +437,13 @@ exports.parseNoPatch = function (code) {
   ast.tokens.pop();
 
   // convert tokens
-  ast.tokens = acornToEsprima.toTokens(ast.tokens, tt, code);
+  ast.tokens = babylonToEspree.toTokens(ast.tokens, tt, code);
 
   // add comments
-  acornToEsprima.convertComments(ast.comments);
+  babylonToEspree.convertComments(ast.comments);
 
   // transform esprima and acorn divergent nodes
-  acornToEsprima.toAST(ast, traverse, code);
+  babylonToEspree.toAST(ast, traverse, code);
 
   // ast.program.tokens = ast.tokens;
   // ast.program.comments = ast.comments;
@@ -457,7 +457,7 @@ exports.parseNoPatch = function (code) {
   delete ast.program;
   delete ast._paths;
 
-  acornToEsprima.attachComments(ast, ast.comments, ast.tokens);
+  babylonToEspree.attachComments(ast, ast.comments, ast.tokens);
 
   return ast;
 }
