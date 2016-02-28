@@ -35,46 +35,32 @@ function assertImplementsAST(target, source, path) {
 function parseAndAssertSame(code) {
   var esAST = espree.parse(code, {
     ecmaFeatures: {
-      arrowFunctions: true,
-      binaryLiterals: true,
-      blockBindings: true,
-      classes: true,
-      defaultParams: true,
-      destructuring: true,
-      forOf: true,
-      generators: true,
-      modules: true,
-      objectLiteralComputedProperties: true,
-      objectLiteralDuplicateProperties: true,
-      objectLiteralShorthandMethods: true,
-      objectLiteralShorthandProperties: true,
-      octalLiterals: true,
-      regexUFlag: true,
-      regexYFlag: true,
-      restParams: true,
-      spread: true,
-      superInFunctions: true,
-      templateStrings: true,
-      unicodeCodePointEscapes: true,
-      globalReturn: true,
-      jsx: true,
-      experimentalObjectRestSpread: true,
+        // enable JSX parsing
+        jsx: true,
+        // enable return in global scope
+        globalReturn: true,
+        // enable implied strict mode (if ecmaVersion >= 5)
+        impliedStrict: true,
+        // allow experimental object rest/spread
+        experimentalObjectRestSpread: true
     },
     tokens: true,
     loc: true,
     range: true,
     comment: true,
-    attachComment: true
+    attachComment: true,
+    ecmaVersion: 6,
+    sourceType: "module"
   });
   var babylonAST = babelEslint.parse(code);
   try {
     assertImplementsAST(esAST, babylonAST);
   } catch(err) {
-    err.message +=
-      "\nespree:\n" +
-      util.inspect(esAST, {depth: err.depth, colors: true}) +
-      "\nbabel-eslint:\n" +
-      util.inspect(babylonAST, {depth: err.depth, colors: true});
+    // err.message +=
+    //   "\nespree:\n" +
+    //   util.inspect(esAST, {depth: err.depth, colors: true}) +
+    //   "\nbabel-eslint:\n" +
+    //   util.inspect(babylonAST, {depth: err.depth, colors: true});
     throw err;
   }
   // assert.equal(esAST, babylonAST);

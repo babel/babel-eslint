@@ -1,7 +1,7 @@
 {
   "name": "babel-eslint",
   "version": "5.0.0",
-  "description": "",
+  "description": "Custom parser for ESLint",
   "main": "index.js",
   "files": [
     "index.js"
@@ -32,8 +32,8 @@
   },
   "homepage": "https://github.com/babel/babel-eslint",
   "devDependencies": {
-    "eslint": "^1.10.2",
-    "espree": "^2.2.5",
+    "eslint": "^2.0.0",
+    "espree": "^3.0.0",
     "mocha": "^2.3.3"
   }
 }
