@@ -4,7 +4,8 @@
   "description": "Custom parser for ESLint",
   "main": "index.js",
   "files": [
-    "index.js"
+    "index.js",
+    "babylon-to-espree"
   ],
   "repository": {
     "type": "git",
