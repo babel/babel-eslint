@@ -450,7 +450,7 @@ exports.parseNoPatch = function (code) {
   // ast = ast.program;
 
   // remove File
-  ast.type = 'Program';
+  ast.type = "Program";
   ast.sourceType = ast.program.sourceType;
   ast.directives = ast.program.directives;
   ast.body = ast.program.body;

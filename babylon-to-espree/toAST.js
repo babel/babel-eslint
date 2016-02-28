@@ -8,7 +8,7 @@ module.exports = function (ast, traverse, code) {
 };
 
 function changeToLiteral(node) {
-  node.type = 'Literal';
+  node.type = "Literal";
   if (!node.raw) {
     if (node.extra && node.extra.raw) {
       node.raw = node.extra.raw;
@@ -36,10 +36,10 @@ var astTransformVisitor = {
     if (node.trailingComments) {
       for (var i = 0; i < node.trailingComments.length; i++) {
         var comment = node.trailingComments[i];
-        if (comment.type === 'CommentLine') {
-          comment.type = 'Line';
-        } else if (comment.type === 'CommentBlock') {
-          comment.type = 'Block';
+        if (comment.type === "CommentLine") {
+          comment.type = "Line";
+        } else if (comment.type === "CommentBlock") {
+          comment.type = "Block";
         }
         comment.range = [comment.start, comment.end];
       }
@@ -48,10 +48,10 @@ var astTransformVisitor = {
     if (node.leadingComments) {
       for (var i = 0; i < node.leadingComments.length; i++) {
         var comment = node.leadingComments[i];
-        if (comment.type === 'CommentLine') {
-          comment.type = 'Line';
-        } else if (comment.type === 'CommentBlock') {
-          comment.type = 'Block';
+        if (comment.type === "CommentLine") {
+          comment.type = "Line";
+        } else if (comment.type === "CommentBlock") {
+          comment.type = "Block";
         }
         comment.range = [comment.start, comment.end];
       }
@@ -70,7 +70,7 @@ var astTransformVisitor = {
     });
 
     if (path.isJSXText()) {
-      node.type = 'Literal';
+      node.type = "Literal";
       node.raw = node.value;
     }
 
@@ -80,18 +80,18 @@ var astTransformVisitor = {
     }
 
     if (path.isBooleanLiteral()) {
-      node.type = 'Literal';
+      node.type = "Literal";
       node.raw = String(node.value);
     }
 
     if (path.isNullLiteral()) {
-      node.type = 'Literal';
-      node.raw = 'null';
+      node.type = "Literal";
+      node.raw = "null";
       node.value = null;
     }
 
     if (path.isRegExpLiteral()) {
-      node.type = 'Literal';
+      node.type = "Literal";
       node.raw = node.extra.raw;
       node.value = {};
       node.regex = {
@@ -104,8 +104,8 @@ var astTransformVisitor = {
     }
 
     if (path.isObjectProperty()) {
-      node.type = 'Property';
-      node.kind = 'init';
+      node.type = "Property";
+      node.kind = "init";
     }
 
     if (path.isClassMethod() || path.isObjectMethod()) {
@@ -113,7 +113,7 @@ var astTransformVisitor = {
       var offset = code.indexOf("(");
 
       node.value = {
-        type: 'FunctionExpression',
+        type: "FunctionExpression",
         id: node.id,
         params: node.params,
         body: node.body,
@@ -144,13 +144,13 @@ var astTransformVisitor = {
       }
 
       if (path.isClassMethod()) {
-        node.type = 'MethodDefinition';
+        node.type = "MethodDefinition";
       }
 
       if (path.isObjectMethod()) {
-        node.type = 'Property';
-        if (node.kind === 'method') {
-          node.kind = 'init';
+        node.type = "Property";
+        if (node.kind === "method") {
+          node.kind = "init";
         }
       }
 

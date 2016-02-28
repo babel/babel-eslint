@@ -35,8 +35,8 @@ function assertImplementsAST(target, source, path) {
 function lookup(obj, keypath, backwardsDepth) {
   if (!keypath) { return obj; }
 
-  return keypath.split('.').slice(0, -1 * backwardsDepth)
-  .reduce((base, segment) => base && base[segment], obj);
+  return keypath.split(".").slice(0, -1 * backwardsDepth)
+  .reduce(function (base, segment) { base && base[segment], obj });
 }
 
 function parseAndAssertSame(code) {
@@ -63,7 +63,7 @@ function parseAndAssertSame(code) {
   try {
     assertImplementsAST(esAST, babylonAST);
   } catch(err) {
-    var traversal = err.message.slice(3, err.message.indexOf(':'));
+    var traversal = err.message.slice(3, err.message.indexOf(":"));
     if (esAST.tokens) {
       delete esAST.tokens;
     }
@@ -406,7 +406,7 @@ describe.only("acorn-to-esprima", function () {
     });
 
     it.only("StringLiteral", function () {
-      parseAndAssertSame('');
+      parseAndAssertSame("");
       parseAndAssertSame("");
       parseAndAssertSame("a");
     });
