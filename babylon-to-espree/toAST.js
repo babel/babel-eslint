@@ -165,8 +165,7 @@ var astTransformVisitor = {
     }
 
     if (path.isRestProperty() || path.isSpreadProperty()) {
-      node.type = "SpreadProperty";
-      node.key = node.value = node.argument;
+      node.type = "Experimental" + node.type;
     }
 
     // flow: prevent "no-undef"
