@@ -36,7 +36,7 @@ function lookup(obj, keypath, backwardsDepth) {
   if (!keypath) { return obj; }
 
   return keypath.split(".").slice(0, -1 * backwardsDepth)
-  .reduce(function (base, segment) { base && base[segment], obj });
+  .reduce(function (base, segment) { return base && base[segment], obj });
 }
 
 function parseAndAssertSame(code) {
@@ -80,7 +80,7 @@ function parseAndAssertSame(code) {
   // assert.equal(esAST, babylonAST);
 }
 
-describe.only("acorn-to-esprima", function () {
+describe("acorn-to-esprima", function () {
   describe("templates", function () {
     it("empty template string", function () {
       parseAndAssertSame("``");
@@ -405,7 +405,7 @@ describe.only("acorn-to-esprima", function () {
       parseAndAssertSame("function F() { super(); }");
     });
 
-    it.only("StringLiteral", function () {
+    it("StringLiteral", function () {
       parseAndAssertSame("");
       parseAndAssertSame("");
       parseAndAssertSame("a");
@@ -442,6 +442,18 @@ describe.only("acorn-to-esprima", function () {
             "}",
         "};"
       ].join("\n"));
+    });
+
+    it("RestOperator", function () {
+      parseAndAssertSame("var { a, ...b } = c");
+      parseAndAssertSame("var [ a, ...b ] = c");
+      parseAndAssertSame("var a = function (...b) {}");
+    });
+
+    it("SpreadOperator", function () {
+      parseAndAssertSame("var a = { b, ...c }");
+      parseAndAssertSame("var a = [ a, ...b ]");
+      parseAndAssertSame("var a = sum(...b)");
     });
   });
 });
