@@ -380,7 +380,9 @@ function monkeypatch() {
   };
 }
 
-exports.parse = function (code) {
+exports.parse = function (code, options) {
+  options = options || {};
+
   try {
     monkeypatch();
   } catch (err) {
@@ -388,12 +390,12 @@ exports.parse = function (code) {
     process.exit(1);
   }
 
-  return exports.parseNoPatch(code);
+  return exports.parseNoPatch(code, options);
 }
 
-exports.parseNoPatch = function (code) {
+exports.parseNoPatch = function (code, options) {
   var opts = {
-    sourceType: "module",
+    sourceType: options.sourceType || "module",
     strictMode: true,
     allowImportExportEverywhere: false, // consistent with espree
     allowReturnOutsideFunction: true,
@@ -422,7 +424,7 @@ exports.parseNoPatch = function (code) {
   } catch (err) {
     if (err instanceof SyntaxError) {
       err.lineNumber = err.loc.line;
-      err.column = err.loc.column;
+      err.column = err.loc.column + 1;
 
       // remove trailing "(LINE:COLUMN)" acorn message and add in esprima syntax error message start
       err.message = "Line " + err.lineNumber + ": " + err.message.replace(/ \((\d+):(\d+)\)$/, "");

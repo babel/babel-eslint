@@ -2,7 +2,6 @@ var source;
 
 module.exports = function (ast, traverse, code) {
   source = code;
-  ast.sourceType = "module";
   ast.range = [ast.start, ast.end];
   traverse(ast, astTransformVisitor);
 };
