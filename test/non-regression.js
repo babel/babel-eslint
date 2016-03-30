@@ -2,27 +2,32 @@
 "use strict";
 var eslint = require("eslint");
 
-function verifyAndAssertMessages(code, rules, expectedMessages, sourceType) {
-  var messages = eslint.linter.verify(
-    code,
-    {
-      parser: require.resolve(".."),
-      rules: rules,
-      env: {
-        node: true,
-        es6: true
+function verifyAndAssertMessages(code, rules, expectedMessages, sourceType, overrideConfig) {
+  var config = {
+    parser: require.resolve(".."),
+    rules: rules,
+    env: {
+      node: true,
+      es6: true
+    },
+    parserOptions: {
+      ecmaVersion: 6,
+      ecmaFeatures: {
+        jsx: true,
+        experimentalObjectRestSpread: true,
+        globalReturn: true
       },
-      parserOptions: {
-        ecmaVersion: 6,
-        ecmaFeatures: {
-          jsx: true,
-          experimentalObjectRestSpread: true,
-          globalReturn: true
-        },
-        sourceType: sourceType || "module"
-      }
+      sourceType: sourceType || "module"
     }
-  );
+  }
+
+  if (overrideConfig) {
+    for (var key in overrideConfig) {
+      config[key] = overrideConfig[key]
+    }
+  }
+
+  var messages = eslint.linter.verify(code, config);
 
   if (messages.length !== expectedMessages.length) {
     throw new Error("Expected " + expectedMessages.length + " message(s), got " + messages.length + " " + JSON.stringify(messages));
