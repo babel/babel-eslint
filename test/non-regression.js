@@ -1142,6 +1142,32 @@ describe("verify", function () {
     );
   });
 
+  it("no-implicit-globals in script", function () {
+    verifyAndAssertMessages(
+      "var leakedGlobal = 1;",
+      { "no-implicit-globals": 1 },
+      [ "1:5 Implicit global variable, assign as global property instead. no-implicit-globals" ],
+      "script",
+      {
+        env: {},
+        parserOptions: { ecmaVersion: 6, sourceType: "script" }
+      }
+    );
+  });
+
+  it("no-implicit-globals in module", function () {
+    verifyAndAssertMessages(
+      "var leakedGlobal = 1;",
+      { "no-implicit-globals": 1 },
+      [],
+      "module",
+      {
+        env: {},
+        parserOptions: { ecmaVersion: 6, sourceType: "module" }
+      }
+    );
+  });
+
   // This two tests are disabled, as the feature to visit properties when
   // there is a spread/rest operator has been removed as it caused problems
   // with other rules #249
