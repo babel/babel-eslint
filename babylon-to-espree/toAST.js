@@ -208,6 +208,7 @@ var astTransformVisitor = {
 
     // remove class property keys (or patch in escope)
     if (path.isClassProperty()) {
+      node._key = node.key;
       delete node.key;
     }
 
