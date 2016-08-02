@@ -38,7 +38,7 @@
   "homepage": "https://github.com/babel/babel-eslint",
   "devDependencies": {
     "eslint": "^3.0.0",
-    "espree": "^3.0.0",
+    "espree": "^3.1.7",
     "mocha": "^3.0.0"
   }
 }
