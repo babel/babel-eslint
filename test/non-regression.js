@@ -1322,7 +1322,7 @@ describe("verify", function () {
         "var x = 1;"
       ].join("\n"),
       { "no-use-before-define": 1 },
-      [ "1:13 'x' was used before it was defined no-use-before-define" ]
+      [ "1:13 'x' was used before it was defined. no-use-before-define" ]
     );
   });
 
@@ -1380,7 +1380,7 @@ describe("verify", function () {
       "var a = 123;",
     ].join("\n"),
       { "no-redeclare": 1 },
-      [ "2:5 'a' is already defined no-redeclare" ],
+      [ "2:5 'a' is already defined. no-redeclare" ],
       "script"
     );
   });
@@ -1391,7 +1391,7 @@ describe("verify", function () {
       "var a = 123;",
     ].join("\n"),
       { "no-redeclare": 1 },
-      [ "2:5 'a' is already defined no-redeclare" ],
+      [ "2:5 'a' is already defined. no-redeclare" ],
       "module"
     );
   });
