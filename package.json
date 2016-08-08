@@ -41,6 +41,6 @@
     "eslint": "^3.0.0",
     "eslint-config-babel": "^1.0.1",
     "espree": "^3.0.0",
-    "mocha": "^3.0.0"
+    "mocha": "^3.0.2"
   }
 }
