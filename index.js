@@ -283,6 +283,7 @@ function monkeypatch() {
     if (node.params) {
       for (var i = 0; i < node.params.length; i++) {
         var param = node.params[i];
+        visitDecorators.call(this, param);
         if (param.typeAnnotation) {
           checkIdentifierOrVisit.call(this, param);
         } else if (t.isAssignmentPattern(param)) {
