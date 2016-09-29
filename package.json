@@ -41,7 +41,7 @@
     "eslint-config-babel": "^1.0.2",
     "eslint-plugin-babel": "^3.3.0",
     "eslint-plugin-flow-vars": "^0.5.0",
-    "espree": "^3.3.1",
+    "espree": "^3.3.2",
     "mocha": "^3.0.0"
   }
 }
