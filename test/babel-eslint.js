@@ -2,6 +2,7 @@ var assert      = require("assert");
 var babelEslint = require("..");
 var espree      = require("espree");
 var util        = require("util");
+var unpad       = require("../utils/unpad");
 
 // Checks if the source ast implements the target ast. Ignores extra keys on source ast
 function assertImplementsAST(target, source, path) {
@@ -70,11 +71,12 @@ function parseAndAssertSame(code) {
     if (babylonAST.tokens) {
       delete babylonAST.tokens;
     }
-    err.message += `
+    err.message += unpad(`
       espree:
       ${util.inspect(lookup(esAST, traversal, 2), {depth: err.depth, colors: true})}
       babel-eslint:
-      ${util.inspect(lookup(babylonAST, traversal, 2), {depth: err.depth, colors: true})}`;
+      ${util.inspect(lookup(babylonAST, traversal, 2), {depth: err.depth, colors: true})}
+    `);
     throw err;
   }
   // assert.equal(esAST, babylonAST);
@@ -132,24 +134,28 @@ describe("babylon-to-esprima", function () {
 
     it("template also with braces #96", function () {
       parseAndAssertSame(
-        `export default function f1() {
-          function f2(foo) {
-            const bar = 3;
-            return \`\${foo} \${bar}\`;
+        unpad(`
+          export default function f1() {
+            function f2(foo) {
+              const bar = 3;
+              return \`\${foo} \${bar}\`;
+            }
+            return f2;
           }
-          return f2;
-        }`
+        `)
       );
     });
 
     it("template with destructuring #31", function () {
       parseAndAssertSame(
-        `module.exports = {
-          render() {
-            var {name} = this.props;
-            return Math.max(null, \`Name: \${name}, Name: \${name}\`);
-          }
-        };`
+        unpad(`
+          module.exports = {
+            render() {
+              var {name} = this.props;
+              return Math.max(null, \`Name: \${name}, Name: \${name}\`);
+            }
+          };
+        `)
       );
     });
   });
@@ -252,30 +258,38 @@ describe("babylon-to-esprima", function () {
 
   it("line comments", function () {
     parseAndAssertSame(
-      `// single comment\nvar foo = 15; // comment next to statement
-      // second comment after statement`
+      unpad(`
+        // single comment
+        var foo = 15; // comment next to statement
+        // second comment after statement
+      `)
     );
   });
 
   it("block comments", function () {
     parseAndAssertSame(
-      `  /* single comment */\nvar foo = 15; /* comment next to statement */
-      /*
-       * multiline
-       * comment
-       */`
+      unpad(`
+        /* single comment */
+        var foo = 15; /* comment next to statement */
+        /*
+         * multiline
+         * comment
+         */
+       `)
     );
   });
 
   it("block comments #124", function () {
     parseAndAssertSame(
-      `React.createClass({
-        render() {
-          // return (
-          //   <div />
-          // ); // <-- this is the line that is reported
-        }
-      });`
+      unpad(`
+        React.createClass({
+          render() {
+            // return (
+            //   <div />
+            // ); // <-- this is the line that is reported
+          }
+        });
+      `)
     );
   });
 
@@ -305,34 +319,41 @@ describe("babylon-to-esprima", function () {
 
   it("jsdoc", function () {
     parseAndAssertSame(
-      `/**
-      * @param {object} options
-      * @return {number}
-      */\nconst test = function({ a, b, c }) {
-        return a + b + c;
-      };
-      module.exports = test;`
+      unpad(`
+        /**
+        * @param {object} options
+        * @return {number}
+        */
+        const test = function({ a, b, c }) {
+          return a + b + c;
+        };
+        module.exports = test;
+      `)
     );
   });
 
   it("empty block with comment", function () {
     parseAndAssertSame(
-      `function a () {
-        try {
-          b();
-        } catch (e) {
-          // asdf
+      unpad(`
+        function a () {
+          try {
+            b();
+          } catch (e) {
+            // asdf
+          }
         }
-      }`
+      `)
     );
   });
 
   describe("babel 6 tests", function () {
     it("MethodDefinition", function () {
       parseAndAssertSame(
-        `export default class A {
-          a() {}
-        }`
+        unpad(`
+          export default class A {
+            a() {}
+          }
+        `)
       );
     });
 
@@ -342,35 +363,41 @@ describe("babylon-to-esprima", function () {
 
     it("ClassMethod", function () {
       parseAndAssertSame(
-        `class A {
-          constructor() {
+        unpad(`
+          class A {
+            constructor() {
+            }
           }
-        }`
+        `)
       );
     });
 
     it("ClassMethod multiple params", function () {
       parseAndAssertSame(
-        `class A {
-          constructor(a, b, c) {
+        unpad(`
+          class A {
+            constructor(a, b, c) {
+            }
           }
-        }`
+        `)
       );
     });
 
     it("ClassMethod multiline", function () {
       parseAndAssertSame(
-        `class A {
-          constructor (
-            a,
-            b,
-            c
-          )
+        unpad(`
+          class A {
+            constructor (
+              a,
+              b,
+              c
+            )
 
-          {
+            {
 
+            }
           }
-        }`
+        `)
       );
     });
 
@@ -380,10 +407,12 @@ describe("babylon-to-esprima", function () {
 
     it("ObjectMethod", function () {
       parseAndAssertSame(
-        `var a = {
-          b(c) {
+        unpad(`
+          var a = {
+            b(c) {
+            }
           }
-        }`
+        `)
       );
     });
 
@@ -410,33 +439,39 @@ describe("babylon-to-esprima", function () {
     it("getters and setters", function () {
       parseAndAssertSame("class A { get x ( ) { ; } }");
       parseAndAssertSame(
-        `class A {
-          get x(
-          )
-          {
-            ;
+        unpad(`
+          class A {
+            get x(
+            )
+            {
+              ;
+            }
           }
-        }`
+        `)
       );
       parseAndAssertSame("class A { set x (a) { ; } }");
       parseAndAssertSame(
-        `class A {
-          set x(a
-          )
-          {
-            ;
+        unpad(`
+          class A {
+            set x(a
+            )
+            {
+              ;
+            }
           }
-        }`
+        `)
       );
       parseAndAssertSame(
-        `var B = {
-          get x () {
-            return this.ecks;
-          },
-          set x (ecks) {
-            this.ecks = ecks;
-          }
-        };`
+        unpad(`
+          var B = {
+            get x () {
+              return this.ecks;
+            },
+            set x (ecks) {
+              this.ecks = ecks;
+            }
+          };
+        `)
       );
     });
 
@@ -454,9 +489,11 @@ describe("babylon-to-esprima", function () {
 
     it("Async/Await", function() {
       parseAndAssertSame(
-        `async function a() {
-          await 1;
-        }`
+        unpad(`
+          async function a() {
+            await 1;
+          }
+        `)
       );
     });
   });

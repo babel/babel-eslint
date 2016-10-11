@@ -1,6 +1,7 @@
 /*eslint-env mocha*/
 "use strict";
 var eslint = require("eslint");
+var unpad = require("../utils/unpad");
 
 function verifyAndAssertMessages(code, rules, expectedMessages, sourceType, overrideConfig) {
   var config = {
@@ -36,10 +37,12 @@ function verifyAndAssertMessages(code, rules, expectedMessages, sourceType, over
   messages.forEach(function (message, i) {
     var formatedMessage = `${message.line}:${message.column} ${message.message}${(message.ruleId ? ` ${message.ruleId}` : "")}`;
     if (formatedMessage !== expectedMessages[i]) {
-      throw new Error(`
-        Message ${i} does not match:
-        Expected: ${expectedMessages[i]}
-        Actual:   ${formatedMessage}`
+      throw new Error(
+        unpad(`
+          Message ${i} does not match:
+          Expected: ${expectedMessages[i]}
+          Actual:   ${formatedMessage}
+        `)
       );
     }
   });
@@ -71,11 +74,13 @@ describe("verify", function () {
   });
 
   it("Modules support (issue #5)", function () {
-    verifyAndAssertMessages(`
-      import Foo from 'foo';
-      export default Foo;
-      export const c = 'c';
-      export class Store {}`,
+    verifyAndAssertMessages(
+      unpad(`
+        import Foo from 'foo';
+        export default Foo;
+        export const c = 'c';
+        export class Store {}
+      `),
       {},
       []
     );
@@ -164,11 +169,13 @@ describe("verify", function () {
   });
 
   it("comment with padded-blocks (issue #33)", function () {
-    verifyAndAssertMessages(`
-      if (a) {
-        // i'm a comment!
-        let b = c
-      }`,
+    verifyAndAssertMessages(
+      unpad(`
+        if (a) {
+          // i'm a comment!
+          let b = c
+        }
+      `),
       { "padded-blocks": [1, "never"] },
       []
     );
@@ -200,133 +207,157 @@ describe("verify", function () {
     });
 
     it("multiple nullable type annotations and return #108", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        import type Foo2 from 'foo';
-        import type Foo3 from 'foo';
-        function log(foo: ?Foo, foo2: ?Foo2): ?Foo3 {
-          console.log(foo, foo2);
-        }
-        log(1, 2);`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          import type Foo2 from 'foo';
+          import type Foo3 from 'foo';
+          function log(foo: ?Foo, foo2: ?Foo2): ?Foo3 {
+            console.log(foo, foo2);
+          }
+          log(1, 2);
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("type parameters", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        import type Foo2 from 'foo';
-        function log<T1, T2>(a: T1, b: T2) { return a + b; }
-        log<Foo, Foo2>(1, 2);`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          import type Foo2 from 'foo';
+          function log<T1, T2>(a: T1, b: T2) { return a + b; }
+          log<Foo, Foo2>(1, 2);
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("nested type annotations", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        function foo(callback: () => Foo) {
-          return callback();
-        }
-        foo();`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          function foo(callback: () => Foo) {
+            return callback();
+          }
+          foo();
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("type in var declaration", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        var x: Foo = 1;
-        x;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          var x: Foo = 1;
+          x;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("object type annotation", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        var a: {numVal: Foo};
-        a;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          var a: {numVal: Foo};
+          a;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("object property types", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        import type Foo2 from 'foo';
-        var a = {
-          circle: (null : ?{ setNativeProps(props: Foo): Foo2 })
-        };
-        a;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          import type Foo2 from 'foo';
+          var a = {
+            circle: (null : ?{ setNativeProps(props: Foo): Foo2 })
+          };
+          a;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("namespaced types", function () {
-      verifyAndAssertMessages(`
-        var React = require('react-native');
-        var b = {
-          openExternalExample: (null: ?React.Component)
-        };
-        var c = {
-          render(): React.Component {}
-        };
-        b;
-        c;`,
+      verifyAndAssertMessages(
+        unpad(`
+          var React = require('react-native');
+          var b = {
+            openExternalExample: (null: ?React.Component)
+          };
+          var c = {
+            render(): React.Component {}
+          };
+          b;
+          c;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("ArrayTypeAnnotation", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        var x: Foo[]; x;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          var x: Foo[]; x;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("ClassImplements", function () {
-      verifyAndAssertMessages(`
-        import type Bar from 'foo';
-        export default class Foo implements Bar {}`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Bar from 'foo';
+          export default class Foo implements Bar {}
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("type alias creates declaration + usage", function () {
-      verifyAndAssertMessages(`
-        type Foo = any;
-        var x : Foo = 1; x;`,
+      verifyAndAssertMessages(
+        unpad(`
+          type Foo = any;
+          var x : Foo = 1; x;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("type alias with type parameters", function () {
-      verifyAndAssertMessages(`
-        import type Bar from 'foo';
-        import type Foo3 from 'foo';
-        type Foo<T> = Bar<T, Foo3>
-        var x : Foo = 1; x;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Bar from 'foo';
+          import type Foo3 from 'foo';
+          type Foo<T> = Bar<T, Foo3>
+          var x : Foo = 1; x;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("export type alias", function () {
-      verifyAndAssertMessages(`
-        import type Foo2 from 'foo';
-        export type Foo = Foo2;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo2 from 'foo';
+          export type Foo = Foo2;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
@@ -341,150 +372,180 @@ describe("verify", function () {
     });
 
     it("types definition from import", function () {
-      verifyAndAssertMessages(`
-        import type Promise from 'bluebird';
-        type Operation = () => Promise;
-        x: Operation;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Promise from 'bluebird';
+          type Operation = () => Promise;
+          x: Operation;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("polymorphpic/generic types for class #123", function () {
-      verifyAndAssertMessages(`
-        class Box<T> {
-          value: T;
-        }
-        var box = new Box();
-        console.log(box.value);`,
+      verifyAndAssertMessages(
+        unpad(`
+          class Box<T> {
+            value: T;
+          }
+          var box = new Box();
+          console.log(box.value);
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("polymorphpic/generic types for function #123", function () {
-      verifyAndAssertMessages(`
-        export function identity<T>(value) {
-          var a: T = value; a;
-        }`,
+      verifyAndAssertMessages(
+        unpad(`
+          export function identity<T>(value) {
+            var a: T = value; a;
+          }
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("polymorphpic/generic types for type alias #123", function () {
-      verifyAndAssertMessages(`
-        import Bar from './Bar';
-        type Foo<T> = Bar<T>; var x: Foo = 1; console.log(x);`,
+      verifyAndAssertMessages(
+        unpad(`
+          import Bar from './Bar';
+          type Foo<T> = Bar<T>; var x: Foo = 1; console.log(x);
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("polymorphpic/generic types - outside of fn scope #123", function () {
-      verifyAndAssertMessages(`
-        export function foo<T>(value) { value; };
-        var b: T = 1; b;`,
+      verifyAndAssertMessages(
+        unpad(`
+          export function foo<T>(value) { value; };
+          var b: T = 1; b;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
-        [ "2:29 'T' is defined but never used. no-unused-vars",
-          "3:16 'T' is not defined. no-undef" ]
+        [ "1:21 'T' is defined but never used. no-unused-vars",
+          "2:8 'T' is not defined. no-undef" ]
       );
     });
 
     it("polymorphpic/generic types - extending unknown #123", function () {
-      verifyAndAssertMessages(`
-        import Bar from 'bar';
-        export class Foo extends Bar<T> {}`,
+      verifyAndAssertMessages(
+        unpad(`
+          import Bar from 'bar';
+          export class Foo extends Bar<T> {}
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
-        [ "3:38 'T' is not defined. no-undef" ]
+        [ "2:30 'T' is not defined. no-undef" ]
       );
     });
 
     it("support declarations #132", function () {
-      verifyAndAssertMessages(`
-        declare class A { static () : number }
-        declare module B { declare var x: number; }
-        declare function foo<T>(): void;
-        declare var bar
-        A; B; foo(); bar;`,
+      verifyAndAssertMessages(
+        unpad(`
+          declare class A { static () : number }
+          declare module B { declare var x: number; }
+          declare function foo<T>(): void;
+          declare var bar
+          A; B; foo(); bar;
+        `),
         { "no-undef": 1, "no-unused-vars": 1 },
         []
       );
     });
 
     it("1", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        import type Foo2 from 'foo';
-        export default function(a: Foo, b: ?Foo2, c){ a; b; c; }`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          import type Foo2 from 'foo';
+          export default function(a: Foo, b: ?Foo2, c){ a; b; c; }
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("2", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        export default function(a: () => Foo){ a; }`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          export default function(a: () => Foo){ a; }
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("3", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        import type Foo2 from 'foo';
-        export default function(a: (_:Foo) => Foo2){ a; }`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          import type Foo2 from 'foo';
+          export default function(a: (_:Foo) => Foo2){ a; }
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("4", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        import type Foo2 from 'foo';
-        import type Foo3 from 'foo';
-        export default function(a: (_1:Foo, _2:Foo2) => Foo3){ a; }`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          import type Foo2 from 'foo';
+          import type Foo3 from 'foo';
+          export default function(a: (_1:Foo, _2:Foo2) => Foo3){ a; }
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("5", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        import type Foo2 from 'foo';
-        export default function(a: (_1:Foo, ...foo:Array<Foo2>) => number){ a; }`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          import type Foo2 from 'foo';
+          export default function(a: (_1:Foo, ...foo:Array<Foo2>) => number){ a; }
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("6", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        export default function(): Foo {}`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          export default function(): Foo {}
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("7", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        export default function():() => Foo {}`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          export default function():() => Foo {}
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("8", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        import type Foo2 from 'foo';
-        export default function():(_?:Foo) => Foo2{}`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          import type Foo2 from 'foo';
+          export default function():(_?:Foo) => Foo2{}
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
@@ -531,110 +592,132 @@ describe("verify", function () {
     });
 
     it("14", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        import type Foo2 from 'foo';
-        export default class Bar {set fooProp(value:Foo):Foo2{ value; }}`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          import type Foo2 from 'foo';
+          export default class Bar {set fooProp(value:Foo):Foo2{ value; }}
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("15", function () {
-      verifyAndAssertMessages(`
-        import type Foo2 from 'foo';
-        export default class Foo {get fooProp(): Foo2{}}`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo2 from 'foo';
+          export default class Foo {get fooProp(): Foo2{}}
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("16", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        var numVal:Foo; numVal;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          var numVal:Foo; numVal;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("17", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        var a: {numVal: Foo;}; a;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          var a: {numVal: Foo;}; a;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("18", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        import type Foo2 from 'foo';
-        import type Foo3 from 'foo';
-        var a: ?{numVal: Foo; [indexer: Foo2]: Foo3}; a;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          import type Foo2 from 'foo';
+          import type Foo3 from 'foo';
+          var a: ?{numVal: Foo; [indexer: Foo2]: Foo3}; a;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("19", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        import type Foo2 from 'foo';
-        var a: {numVal: Foo; subObj?: ?{strVal: Foo2}}; a;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          import type Foo2 from 'foo';
+          var a: {numVal: Foo; subObj?: ?{strVal: Foo2}}; a;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("20", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        import type Foo2 from 'foo';
-        import type Foo3 from 'foo';
-        import type Foo4 from 'foo';
-        var a: { [a: Foo]: Foo2; [b: Foo3]: Foo4; }; a;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          import type Foo2 from 'foo';
+          import type Foo3 from 'foo';
+          import type Foo4 from 'foo';
+          var a: { [a: Foo]: Foo2; [b: Foo3]: Foo4; }; a;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("21", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        import type Foo2 from 'foo';
-        import type Foo3 from 'foo';
-        var a: {add(x:Foo, ...y:Array<Foo2>): Foo3}; a;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          import type Foo2 from 'foo';
+          import type Foo3 from 'foo';
+          var a: {add(x:Foo, ...y:Array<Foo2>): Foo3}; a;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("22", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        import type Foo2 from 'foo';
-        import type Foo3 from 'foo';
-        var a: { id<Foo>(x: Foo2): Foo3; }; a;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          import type Foo2 from 'foo';
+          import type Foo3 from 'foo';
+          var a: { id<Foo>(x: Foo2): Foo3; }; a;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("23", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        var a:Array<Foo> = [1, 2, 3]; a;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          var a:Array<Foo> = [1, 2, 3]; a;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("24", function () {
-      verifyAndAssertMessages(`
-        import type Baz from 'baz';
-        export default class Bar<T> extends Baz<T> { };`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Baz from 'baz';
+          export default class Bar<T> extends Baz<T> { };
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
@@ -649,227 +732,275 @@ describe("verify", function () {
     });
 
     it("26", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        import type Foo2 from 'foo';
-        export default class Bar { static prop1:Foo; prop2:Foo2; }`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          import type Foo2 from 'foo';
+          export default class Bar { static prop1:Foo; prop2:Foo2; }
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("27", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        import type Foo2 from 'foo';
-        var x : Foo | Foo2 = 4; x;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          import type Foo2 from 'foo';
+          var x : Foo | Foo2 = 4; x;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("28", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        import type Foo2 from 'foo';
-        var x : () => Foo | () => Foo2; x;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          import type Foo2 from 'foo';
+          var x : () => Foo | () => Foo2; x;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("29", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        import type Foo2 from 'foo';
-        var x: typeof Foo | number = Foo2; x;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          import type Foo2 from 'foo';
+          var x: typeof Foo | number = Foo2; x;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("30", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        var {x}: {x: Foo; } = { x: 'hello' }; x;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          var {x}: {x: Foo; } = { x: 'hello' }; x;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("31", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        var [x]: Array<Foo> = [ 'hello' ]; x;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          var [x]: Array<Foo> = [ 'hello' ]; x;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("32", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        export default function({x}: { x: Foo; }) { x; }`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          export default function({x}: { x: Foo; }) { x; }
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("33", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        function foo([x]: Array<Foo>) { x; } foo();`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          function foo([x]: Array<Foo>) { x; } foo();
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("34", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        import type Foo2 from 'foo';
-        var a: Map<Foo, Array<Foo2> >; a;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          import type Foo2 from 'foo';
+          var a: Map<Foo, Array<Foo2> >; a;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("35", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        var a: ?Promise<Foo>[]; a;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          var a: ?Promise<Foo>[]; a;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("36", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        import type Foo2 from 'foo';
-        var a:(...rest:Array<Foo>) => Foo2; a;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          import type Foo2 from 'foo';
+          var a:(...rest:Array<Foo>) => Foo2; a;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("37", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        import type Foo2 from 'foo';
-        import type Foo3 from 'foo';
-        import type Foo4 from 'foo';
-        var a: <Foo>(x: Foo2, ...y:Foo3[]) => Foo4; a;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          import type Foo2 from 'foo';
+          import type Foo3 from 'foo';
+          import type Foo4 from 'foo';
+          var a: <Foo>(x: Foo2, ...y:Foo3[]) => Foo4; a;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("38", function () {
-      verifyAndAssertMessages(`
-        import type {foo, bar} from 'baz';
-        foo; bar;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type {foo, bar} from 'baz';
+          foo; bar;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("39", function () {
-      verifyAndAssertMessages(`
-        import type {foo as bar} from 'baz';
-        bar;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type {foo as bar} from 'baz';
+          bar;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("40", function () {
-      verifyAndAssertMessages(`
-        import type from 'foo';
-        type;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type from 'foo';
+          type;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("41", function () {
-      verifyAndAssertMessages(`
-        import type, {foo} from 'bar';
-        type; foo;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type, {foo} from 'bar';
+          type; foo;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("42", function () {
-      verifyAndAssertMessages(`
-        import type * as namespace from 'bar';
-        namespace;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type * as namespace from 'bar';
+          namespace;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("43", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        var a: Foo[]; a;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          var a: Foo[]; a;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("44", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        var a: ?Foo[]; a;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          var a: ?Foo[]; a;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("45", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        var a: (?Foo)[]; a;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          var a: (?Foo)[]; a;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("46", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        var a: () => Foo[]; a;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          var a: () => Foo[]; a;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("47", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        var a: (() => Foo)[]; a;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          var a: (() => Foo)[]; a;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("48", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        var a: typeof Foo[]; a;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          var a: typeof Foo[]; a;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
     });
 
     it("49", function () {
-      verifyAndAssertMessages(`
-        import type Foo from 'foo';
-        import type Foo2 from 'foo';
-        import type Foo3 from 'foo';
-        var a : [Foo, Foo2<Foo3>,] = [123, 'duck',]; a;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from 'foo';
+          import type Foo2 from 'foo';
+          import type Foo3 from 'foo';
+          var a : [Foo, Foo2<Foo3>,] = [123, 'duck',]; a;
+        `),
         { "no-unused-vars": 1, "no-undef": 1 },
         []
       );
@@ -885,12 +1016,14 @@ describe("verify", function () {
   });
 
   it("class definition: gaearon/redux#24", function () {
-    verifyAndAssertMessages(`
-      export default function root(stores) {
-      return DecoratedComponent => class ReduxRootDecorator {
-      a() { DecoratedComponent; stores; }
-      };
-      }`,
+    verifyAndAssertMessages(
+      unpad(`
+        export default function root(stores) {
+        return DecoratedComponent => class ReduxRootDecorator {
+        a() { DecoratedComponent; stores; }
+        };
+        }
+      `),
       { "no-undef": 1, "no-unused-vars": 1 },
       []
     );
@@ -913,13 +1046,15 @@ describe("verify", function () {
   });
 
   it("template with destructuring #31", function () {
-    verifyAndAssertMessages(`
-      module.exports = {
-      render() {
-      var {name} = this.props;
-      return Math.max(null, \`Name: \${name}, Name: \${name}\`);
-      }
-      };`,
+    verifyAndAssertMessages(
+      unpad(`
+        module.exports = {
+        render() {
+        var {name} = this.props;
+        return Math.max(null, \`Name: \${name}, Name: \${name}\`);
+        }
+        };
+      `),
       { "comma-spacing": 1 },
       []
     );
@@ -927,87 +1062,97 @@ describe("verify", function () {
 
   describe("decorators #72", function () {
     it("class declaration", function () {
-      verifyAndAssertMessages(`
-        import classDeclaration from 'decorator';
-        import decoratorParameter from 'decorator';
-        @classDeclaration((parameter) => parameter)
-        @classDeclaration(decoratorParameter)
-        @classDeclaration
-        export class TextareaAutosize {}`,
+      verifyAndAssertMessages(
+        unpad(`
+          import classDeclaration from 'decorator';
+          import decoratorParameter from 'decorator';
+          @classDeclaration((parameter) => parameter)
+          @classDeclaration(decoratorParameter)
+          @classDeclaration
+          export class TextareaAutosize {}
+        `),
         { "no-unused-vars": 1 },
         []
       );
     });
 
     it("method definition", function () {
-      verifyAndAssertMessages(`
-        import classMethodDeclarationA from 'decorator';
-        import decoratorParameter from 'decorator';
-        export class TextareaAutosize {
-        @classMethodDeclarationA((parameter) => parameter)
-        @classMethodDeclarationA(decoratorParameter)
-        @classMethodDeclarationA
-        methodDeclaration(e) {
-        e();
-        }
-        }`,
+      verifyAndAssertMessages(
+        unpad(`
+          import classMethodDeclarationA from 'decorator';
+          import decoratorParameter from 'decorator';
+          export class TextareaAutosize {
+          @classMethodDeclarationA((parameter) => parameter)
+          @classMethodDeclarationA(decoratorParameter)
+          @classMethodDeclarationA
+          methodDeclaration(e) {
+          e();
+          }
+          }
+        `),
         { "no-unused-vars": 1 },
         []
       );
     });
 
     it("method definition get/set", function () {
-      verifyAndAssertMessages(`
-        import classMethodDeclarationA from 'decorator';
-        import decoratorParameter from 'decorator';
-        export class TextareaAutosize {
-        @classMethodDeclarationA((parameter) => parameter)
-        @classMethodDeclarationA(decoratorParameter)
-        @classMethodDeclarationA
-        get bar() { }
-        @classMethodDeclarationA((parameter) => parameter)
-        @classMethodDeclarationA(decoratorParameter)
-        @classMethodDeclarationA
-        set bar(val) { val; }
-        }`,
+      verifyAndAssertMessages(
+        unpad(`
+          import classMethodDeclarationA from 'decorator';
+          import decoratorParameter from 'decorator';
+          export class TextareaAutosize {
+          @classMethodDeclarationA((parameter) => parameter)
+          @classMethodDeclarationA(decoratorParameter)
+          @classMethodDeclarationA
+          get bar() { }
+          @classMethodDeclarationA((parameter) => parameter)
+          @classMethodDeclarationA(decoratorParameter)
+          @classMethodDeclarationA
+          set bar(val) { val; }
+          }
+        `),
         { "no-unused-vars": 1 },
         []
       );
     });
 
     it("object property", function () {
-      verifyAndAssertMessages(`
-        import classMethodDeclarationA from 'decorator';
-        import decoratorParameter from 'decorator';
-        var obj = {
-        @classMethodDeclarationA((parameter) => parameter)
-        @classMethodDeclarationA(decoratorParameter)
-        @classMethodDeclarationA
-        methodDeclaration(e) {
-        e();
-        }
-        };
-        obj;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import classMethodDeclarationA from 'decorator';
+          import decoratorParameter from 'decorator';
+          var obj = {
+          @classMethodDeclarationA((parameter) => parameter)
+          @classMethodDeclarationA(decoratorParameter)
+          @classMethodDeclarationA
+          methodDeclaration(e) {
+          e();
+          }
+          };
+          obj;
+        `),
         { "no-unused-vars": 1 },
         []
       );
     });
 
     it("object property get/set", function () {
-      verifyAndAssertMessages(`
-        import classMethodDeclarationA from 'decorator';
-        import decoratorParameter from 'decorator';
-        var obj = {
-        @classMethodDeclarationA((parameter) => parameter)
-        @classMethodDeclarationA(decoratorParameter)
-        @classMethodDeclarationA
-        get bar() { },
-        @classMethodDeclarationA((parameter) => parameter)
-        @classMethodDeclarationA(decoratorParameter)
-        @classMethodDeclarationA
-        set bar(val) { val; }
-        };
-        obj;`,
+      verifyAndAssertMessages(
+        unpad(`
+          import classMethodDeclarationA from 'decorator';
+          import decoratorParameter from 'decorator';
+          var obj = {
+          @classMethodDeclarationA((parameter) => parameter)
+          @classMethodDeclarationA(decoratorParameter)
+          @classMethodDeclarationA
+          get bar() { },
+          @classMethodDeclarationA((parameter) => parameter)
+          @classMethodDeclarationA(decoratorParameter)
+          @classMethodDeclarationA
+          set bar(val) { val; }
+          };
+          obj;
+        `),
         { "no-unused-vars": 1 },
         []
       );
@@ -1074,34 +1219,40 @@ describe("verify", function () {
   });
 
   it("don't warn no-unused-vars with spread #142", function () {
-    verifyAndAssertMessages(`
-      export default function test(data) {
-      return {
-      foo: 'bar',
-      ...data
-      };
-      }`,
+    verifyAndAssertMessages(
+      unpad(`
+        export default function test(data) {
+        return {
+        foo: 'bar',
+        ...data
+        };
+        }
+      `),
       { "no-undef": 1, "no-unused-vars": 1 },
       []
     );
   });
 
   it("excludes comment tokens #153", function () {
-    verifyAndAssertMessages(`
-      var a = [
-      1,
-      2, // a trailing comment makes this line fail comma-dangle (always-multiline)
-      ];`,
+    verifyAndAssertMessages(
+      unpad(`
+        var a = [
+        1,
+        2, // a trailing comment makes this line fail comma-dangle (always-multiline)
+        ];
+      `),
       { "comma-dangle": [2, "always-multiline"] },
       []
     );
 
-    verifyAndAssertMessages(`
-      switch (a) {
-      // A comment here makes the above line fail brace-style
-      case 1:
-      console.log(a);
-      }`,
+    verifyAndAssertMessages(
+      unpad(`
+        switch (a) {
+        // A comment here makes the above line fail brace-style
+        case 1:
+        console.log(a);
+        }
+      `),
       { "brace-style": 2 },
       []
     );
@@ -1116,30 +1267,34 @@ describe("verify", function () {
   });
 
   it("line comment space-in-parens #124", function () {
-    verifyAndAssertMessages(`
-      React.createClass({
-      render() {
-      // return (
-      //   <div />
-      // ); // <-- this is the line that is reported
-      }
-      });`,
+    verifyAndAssertMessages(
+      unpad(`
+        React.createClass({
+        render() {
+        // return (
+        //   <div />
+        // ); // <-- this is the line that is reported
+        }
+        });
+      `),
       { "space-in-parens": 1 },
       [ ]
     );
   });
 
   it("block comment space-in-parens #124", function () {
-    verifyAndAssertMessages(`
-      React.createClass({
-      render() {
-      /*
-      return (
-        <div />
-      ); // <-- this is the line that is reported
-      */
-      }
-      });`,
+    verifyAndAssertMessages(
+      unpad(`
+        React.createClass({
+        render() {
+        /*
+        return (
+          <div />
+        ); // <-- this is the line that is reported
+        */
+        }
+        });
+      `),
       { "space-in-parens": 1 },
       [ ]
     );
@@ -1160,28 +1315,32 @@ describe("verify", function () {
   });
 
   it("default param flow type no-unused-vars #184", function () {
-    verifyAndAssertMessages(`
-      type ResolveOptionType = {
-      depth?: number,
-      identifier?: string
-      };
+    verifyAndAssertMessages(
+      unpad(`
+        type ResolveOptionType = {
+        depth?: number,
+        identifier?: string
+        };
 
-      export default function resolve(
-      options: ResolveOptionType = {}
-      ): Object {
-      options;
-      }`,
+        export default function resolve(
+        options: ResolveOptionType = {}
+        ): Object {
+        options;
+        }
+      `),
       { "no-unused-vars": 1, "no-undef": 1 },
       [ ]
     );
   });
 
   it("no-use-before-define #192", function () {
-    verifyAndAssertMessages(`
-      console.log(x);
-      var x = 1;`,
+    verifyAndAssertMessages(
+      unpad(`
+        console.log(x);
+        var x = 1;
+      `),
       { "no-use-before-define": 1 },
-      [ "2:19 'x' was used before it was defined. no-use-before-define" ]
+      [ "1:13 'x' was used before it was defined. no-use-before-define" ]
     );
   });
 
@@ -1194,58 +1353,68 @@ describe("verify", function () {
   });
 
   it("getter/setter #218", function () {
-    verifyAndAssertMessages(`
-      class Person {
-          set a (v) { }
-      }`,
+    verifyAndAssertMessages(
+      unpad(`
+        class Person {
+            set a (v) { }
+        }
+      `),
       { "space-before-function-paren": 1, "keyword-spacing": [1, {"before": true}], "indent": 1 },
       []
     );
   });
 
   it("getter/setter #220", function () {
-    verifyAndAssertMessages(`
-      var B = {
-      get x () {
-      return this.ecks;
-      },
-      set x (ecks) {
-      this.ecks = ecks;
-      }
-      };`,
+    verifyAndAssertMessages(
+      unpad(`
+        var B = {
+        get x () {
+        return this.ecks;
+        },
+        set x (ecks) {
+        this.ecks = ecks;
+        }
+        };
+      `),
       { "no-dupe-keys": 1 },
       []
     );
   });
 
   it("fixes issues with flow types and ObjectPattern", function () {
-    verifyAndAssertMessages(`
-      import type Foo from 'bar';
-      export default class Foobar {
-        foo({ bar }: Foo) { bar; }
-        bar({ foo }: Foo) { foo; }
-      }`,
+    verifyAndAssertMessages(
+      unpad(`
+        import type Foo from 'bar';
+        export default class Foobar {
+          foo({ bar }: Foo) { bar; }
+          bar({ foo }: Foo) { foo; }
+        }
+      `),
       { "no-unused-vars": 1, "no-shadow": 1 },
       []
     );
   });
 
   it("correctly detects redeclares if in script mode #217", function () {
-    verifyAndAssertMessages(`
-      var a = 321;
-      var a = 123;`,
+    verifyAndAssertMessages(
+      unpad(`
+        var a = 321;
+        var a = 123;
+      `),
       { "no-redeclare": 1 },
-      [ "3:11 'a' is already defined. no-redeclare" ],
+      [ "2:5 'a' is already defined. no-redeclare" ],
       "script"
     );
   });
 
   it("correctly detects redeclares if in module mode #217", function () {
-    verifyAndAssertMessages(`
-      var a = 321;
-      var a = 123;`,
+    verifyAndAssertMessages(
+      unpad(`
+        var a = 321;
+        var a = 123;
+      `),
       { "no-redeclare": 1 },
-      [ "3:11 'a' is already defined. no-redeclare" ],
+      [ "2:5 'a' is already defined. no-redeclare" ],
       "module"
     );
   });
@@ -1290,10 +1459,12 @@ describe("verify", function () {
   });
 
   it("allowImportExportEverywhere option (#327)", function () {
-    verifyAndAssertMessages(`
-      if (true) { import Foo from 'foo'; }
-      function foo() { import Bar from 'bar'; }
-      switch (a) { case 1: import FooBar from 'foobar'; }`,
+    verifyAndAssertMessages(
+      unpad(`
+        if (true) { import Foo from 'foo'; }
+        function foo() { import Bar from 'bar'; }
+        switch (a) { case 1: import FooBar from 'foobar'; }
+      `),
       {},
       [],
       "module",
@@ -1330,44 +1501,53 @@ describe("verify", function () {
   });
 
   it("decorator does not create TypeError #229", function () {
-    verifyAndAssertMessages(`
-      class A {
-        @test
-        f() {}
-      }`,
+    verifyAndAssertMessages(
+      unpad(`
+        class A {
+          @test
+          f() {}
+        }
+      `),
       { "no-undef": 1 },
-      [ "3:10 'test' is not defined. no-undef" ]
+      [ "2:4 'test' is not defined. no-undef" ]
     );
   });
 
   it("Flow definition does not trigger warnings #223", function () {
-    verifyAndAssertMessages(`
-      import { Map as $Map } from 'immutable';
-      function myFunction($state: $Map, { a, b, c } : { a: ?Object, b: ?Object, c: $Map }) {}`,
+    verifyAndAssertMessages(
+      unpad(`
+        import { Map as $Map } from 'immutable';
+        function myFunction($state: $Map, { a, b, c } : { a: ?Object, b: ?Object, c: $Map }) {}
+      `),
       { "no-dupe-args": 1, "no-redeclare": 1, "no-shadow": 1 },
       []
     );
   });
 
   it("newline-before-return with comments #289", function () {
-    verifyAndAssertMessages(`
-      function a() {
-      if (b) {
-      /* eslint-disable no-console */
-      console.log('test');
-      /* eslint-enable no-console */
-      }
+    verifyAndAssertMessages(
+      unpad(`
+        function a() {
+        if (b) {
+        /* eslint-disable no-console */
+        console.log('test');
+        /* eslint-enable no-console */
+        }
 
-      return hasGlobal;
-      }`,
+        return hasGlobal;
+        }
+      `),
       { "newline-before-return": 1 },
       []
     );
   });
 
   it("spaced-comment with shebang #163", function () {
-    verifyAndAssertMessages(`#!/usr/bin/env babel-node
-      import {spawn} from 'foobar';`,
+    verifyAndAssertMessages(
+      unpad(`
+        #!/usr/bin/env babel-node
+        import {spawn} from 'foobar';
+      `),
       { "spaced-comment": 1 },
       []
     );
@@ -1375,41 +1555,47 @@ describe("verify", function () {
 
   describe("Class Property Declarations", function() {
     it("no-redeclare false positive 1", function() {
-      verifyAndAssertMessages(`
-        class Group {
-          static propTypes = {};
-        }
-        class TypicalForm {
-          static propTypes = {};
-        }`,
+      verifyAndAssertMessages(
+        unpad(`
+          class Group {
+            static propTypes = {};
+          }
+          class TypicalForm {
+            static propTypes = {};
+          }
+        `),
         { "no-redeclare": 1 },
         []
       );
     });
 
     it("no-redeclare false positive 2", function() {
-      verifyAndAssertMessages(`
-        function validate() {}
-        class MyComponent {
-          static validate = validate;
-        }`,
+      verifyAndAssertMessages(
+        unpad(`
+          function validate() {}
+          class MyComponent {
+            static validate = validate;
+          }
+        `),
         { "no-redeclare": 1 },
         []
       );
     });
 
     it("check references", function() {
-      verifyAndAssertMessages(`
-        var a;
-        class A {
-          prop1;
-          prop2 = a;
-          prop3 = b;
-        }
-        new A`,
+      verifyAndAssertMessages(
+        unpad(`
+          var a;
+          class A {
+            prop1;
+            prop2 = a;
+            prop3 = b;
+          }
+          new A
+        `),
         { "no-undef": 1, "no-unused-vars": 1, "no-redeclare": 1 },
         [
-          "6:19 'b' is not defined. no-undef"
+          "5:11 'b' is not defined. no-undef"
         ]
       );
     });
