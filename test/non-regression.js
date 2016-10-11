@@ -30,13 +30,17 @@ function verifyAndAssertMessages(code, rules, expectedMessages, sourceType, over
   var messages = eslint.linter.verify(code, config);
 
   if (messages.length !== expectedMessages.length) {
-    throw new Error("Expected " + expectedMessages.length + " message(s), got " + messages.length + " " + JSON.stringify(messages));
+    throw new Error(`Expected ${expectedMessages.length} message(s), got ${messages.length} ${JSON.stringify(messages)}`);
   }
 
   messages.forEach(function (message, i) {
-    var formatedMessage = message.line + ":" + message.column + " " + message.message + (message.ruleId ? " " + message.ruleId : "");
+    var formatedMessage = `${message.line}:${message.column} ${message.message}${(message.ruleId ? ` ${message.ruleId}` : "")}`;
     if (formatedMessage !== expectedMessages[i]) {
-      throw new Error("Message " + i + " does not match:\nExpected: " + expectedMessages[i] + "\nActual:   " + formatedMessage);
+      throw new Error(`
+        Message ${i} does not match:
+        Expected: ${expectedMessages[i]}
+        Actual:   ${formatedMessage}`
+      );
     }
   });
 }
