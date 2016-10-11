@@ -252,16 +252,14 @@ describe("babylon-to-esprima", function () {
 
   it("line comments", function () {
     parseAndAssertSame(
-      `// single comment
-      var foo = 15; // comment next to statement
+      `// single comment\nvar foo = 15; // comment next to statement
       // second comment after statement`
     );
   });
 
   it("block comments", function () {
     parseAndAssertSame(
-      `  /* single comment */
-      var foo = 15; /* comment next to statement */
+      `  /* single comment */\nvar foo = 15; /* comment next to statement */
       /*
        * multiline
        * comment
@@ -310,8 +308,7 @@ describe("babylon-to-esprima", function () {
       `/**
       * @param {object} options
       * @return {number}
-      */
-      const test = function({ a, b, c }) {
+      */\nconst test = function({ a, b, c }) {
         return a + b + c;
       };
       module.exports = test;`
