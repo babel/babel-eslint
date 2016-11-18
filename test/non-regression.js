@@ -6,7 +6,7 @@ var unpad = require("../utils/unpad");
 function verifyAndAssertMessages(code, rules, expectedMessages, sourceType, overrideConfig) {
   var config = {
     parser: require.resolve(".."),
-    rules: rules,
+    rules,
     env: {
       node: true,
       es6: true
@@ -18,7 +18,7 @@ function verifyAndAssertMessages(code, rules, expectedMessages, sourceType, over
         experimentalObjectRestSpread: true,
         globalReturn: true
       },
-      sourceType: sourceType
+      sourceType
     }
   };
 

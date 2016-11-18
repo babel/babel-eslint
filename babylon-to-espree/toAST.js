@@ -30,7 +30,7 @@ function changeComments(nodeComments) {
 
 var astTransformVisitor = {
   noScope: true,
-  enter: function (path) {
+  enter (path) {
     var node = path.node;
 
     node.range = [node.start, node.end];
@@ -54,7 +54,7 @@ var astTransformVisitor = {
     // make '_paths' non-enumerable (babel-eslint #200)
     Object.defineProperty(node, "_paths", { value: node._paths, writable: true });
   },
-  exit: function (path) {
+  exit (path) {
     var node = path.node;
 
     [
