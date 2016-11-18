@@ -59,7 +59,7 @@ var astTransformVisitor = {
 
     [
       fixDirectives,
-    ].forEach(function (fixer) {
+    ].forEach((fixer) => {
       fixer(path);
     });
 
@@ -210,7 +210,7 @@ var astTransformVisitor = {
 
     // template string range fixes
     if (path.isTemplateLiteral()) {
-      node.quasis.forEach(function (q) {
+      node.quasis.forEach((q) => {
         q.range[0] -= 1;
         if (q.tail) {
           q.range[1] += 1;
@@ -243,7 +243,7 @@ function fixDirectives (path) {
 
   if (!directivesContainer.directives) return;
 
-  directivesContainer.directives.reverse().forEach(function (directive) {
+  directivesContainer.directives.reverse().forEach((directive) => {
     directive.type = "ExpressionStatement";
     directive.expression = directive.value;
     delete directive.value;
