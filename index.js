@@ -150,9 +150,7 @@ function monkeypatch() {
       if (propertyType.type === "loop") {
         nodeProperty.forEach((property) => {
           if (Array.isArray(propertyType.values)) {
-            propertyType.values.forEach((value) => {
-              checkIdentifierOrVisit.call(this, property[value]);
-            });
+            propertyType.values.forEach((value) => checkIdentifierOrVisit.call(this, property[value]));
           } else {
             checkIdentifierOrVisit.call(this, property);
           }
