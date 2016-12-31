@@ -4,7 +4,8 @@ exports.toTokens       = require("./toTokens");
 exports.toAST          = require("./toAST");
 
 exports.convertComments = function (comments) {
-  comments.forEach((comment) => {
+  for (var i = 0; i < comments.length; i++) {
+    var comment = comments[i];
     if (comment.type === "CommentBlock") {
       comment.type = "Block";
     } else if (comment.type === "CommentLine") {
@@ -15,5 +16,5 @@ exports.convertComments = function (comments) {
     if (!comment.range) {
       comment.range = [comment.start, comment.end];
     }
-  });
+  }
 };

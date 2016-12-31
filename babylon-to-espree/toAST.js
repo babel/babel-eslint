@@ -18,14 +18,15 @@ function changeToLiteral(node) {
 }
 
 function changeComments(nodeComments) {
-  nodeComments.forEach((comment) => {
+  for (var i = 0; i < nodeComments.length; i++) {
+    var comment = nodeComments[i];
     if (comment.type === "CommentLine") {
       comment.type = "Line";
     } else if (comment.type === "CommentBlock") {
       comment.type = "Block";
     }
     comment.range = [comment.start, comment.end];
-  });
+  }
 }
 
 var astTransformVisitor = {

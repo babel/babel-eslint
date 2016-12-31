@@ -92,11 +92,11 @@ function monkeypatch() {
     if (!node.decorators) {
       return;
     }
-    node.decorators.forEach((decorator) => {
-      if (decorator.expression) {
-        this.visit(decorator);
+    for (var i = 0; i < node.decorators.length; i++) {
+      if (node.decorators[i].expression) {
+        this.visit(node.decorators[i]);
       }
-    });
+    }
   }
 
   // iterate through part of t.VISITOR_KEYS
@@ -140,27 +140,32 @@ function monkeypatch() {
     }
 
     // can have multiple properties
-    visitorValues.forEach((visitorValue) => {
+    for (var i = 0; i < visitorValues.length; i++) {
+      var visitorValue = visitorValues[i];
       var propertyType = propertyTypes[visitorValue];
       var nodeProperty = node[visitorValue];
       // check if property or type is defined
       if (propertyType == null || nodeProperty == null) {
-        return;
+        continue;
       }
       if (propertyType.type === "loop") {
-        nodeProperty.forEach((property) => {
+        for (var j = 0; j < nodeProperty.length; j++) {
           if (Array.isArray(propertyType.values)) {
-            propertyType.values.forEach((value) => checkIdentifierOrVisit.call(this, property[value]));
+            for (var k = 0; k < propertyType.values.length; k++) {
+              checkIdentifierOrVisit.call(this, nodeProperty[j][propertyType.values[k]]);
+            }
           } else {
-            checkIdentifierOrVisit.call(this, property);
+            checkIdentifierOrVisit.call(this, nodeProperty[j]);
           }
-        });
+        }
       } else if (propertyType.type === "single") {
         checkIdentifierOrVisit.call(this, nodeProperty);
       } else if (propertyType.type === "typeAnnotation") {
         visitTypeAnnotation.call(this, node.typeAnnotation);
       } else if (propertyType.type === "typeParameters") {
-        node.typeParameters.params.forEach((params) => checkIdentifierOrVisit.call(this, params));
+        for (var l = 0; l < node.typeParameters.params.length; l++) {
+          checkIdentifierOrVisit.call(this, node.typeParameters.params[l]);
+        }
       } else if (propertyType.type === "id") {
         if (node.id.type === "Identifier") {
           checkIdentifierOrVisit.call(this, node.id);
@@ -168,7 +173,7 @@ function monkeypatch() {
           visitTypeAnnotation.call(this, node.id);
         }
       }
-    });
+    }
   }
 
   function checkIdentifierOrVisit(node) {
@@ -185,9 +190,10 @@ function monkeypatch() {
     var parentScope = manager.__currentScope;
     var scope = new escope.Scope(manager, "type-parameters", parentScope, node, false);
     manager.__nestScope(scope);
-    node.typeParameters.params.forEach((name) => {
+    for (var j = 0; j < node.typeParameters.params.length; j++) {
+      var name = node.typeParameters.params[j];
       scope.__define(name, new Definition("TypeParameter", name, name));
-    });
+    }
     scope.__define = function() {
       return parentScope.__define.apply(parentScope, arguments);
     };
@@ -204,10 +210,14 @@ function monkeypatch() {
     }
     // visit flow type: ClassImplements
     if (node.implements) {
-      node.implements.forEach((implement) => checkIdentifierOrVisit.call(this, implement));
+      for (var i = 0; i < node.implements.length; i++) {
+        checkIdentifierOrVisit.call(this, node.implements[i]);
+      }
     }
     if (node.superTypeParameters) {
-      node.superTypeParameters.params.forEach((param) => checkIdentifierOrVisit.call(this, param));
+      for (var k = 0; k < node.superTypeParameters.params.length; k++) {
+        checkIdentifierOrVisit.call(this, node.superTypeParameters.params[k]);
+      }
     }
     visitClass.call(this, node);
     if (typeParamScope) {
@@ -245,7 +255,8 @@ function monkeypatch() {
     }
     // only visit if function parameters have types
     if (node.params) {
-      node.params.forEach((param) => {
+      for (var i = 0; i < node.params.length; i++) {
+        var param = node.params[i];
         if (param.typeAnnotation) {
           checkIdentifierOrVisit.call(this, param);
         } else if (t.isAssignmentPattern(param)) {
@@ -253,7 +264,7 @@ function monkeypatch() {
             checkIdentifierOrVisit.call(this, param.left);
           }
         }
-      });
+      }
     }
     // set ArrayPattern/ObjectPattern visitor keys back to their original. otherwise
     // escope will traverse into them and include the identifiers within as declarations
@@ -276,12 +287,13 @@ function monkeypatch() {
   var variableDeclaration = referencer.prototype.VariableDeclaration;
   referencer.prototype.VariableDeclaration = function(node) {
     if (node.declarations) {
-      node.declarations.forEach((declaration) => {
-        var typeAnnotation = declaration.id.typeAnnotation;
+      for (var i = 0; i < node.declarations.length; i++) {
+        var id = node.declarations[i].id;
+        var typeAnnotation = id.typeAnnotation;
         if (typeAnnotation) {
           checkIdentifierOrVisit.call(this, typeAnnotation);
         }
-      });
+      }
     }
     variableDeclaration.call(this, node);
   };
