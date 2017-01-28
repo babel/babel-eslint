@@ -16,7 +16,7 @@
     "babel-traverse": "^6.15.0",
     "babel-types": "^6.15.0",
     "babylon": "^6.13.0",
-    "lodash.pickby": "^4.6.0"
+    "lodash": "^4.2.0"
   },
   "scripts": {
     "bootstrap": "git submodule update --init && cd eslint && npm install",
