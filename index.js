@@ -366,7 +366,7 @@ exports.parse = function (code, options) {
 
 exports.parseNoPatch = function (code, options) {
   var opts = {
-    codeHighlight: options.hasOwnProperty("codeHighlight") ? options.codeHighlight : true,
+    codeFrame: options.hasOwnProperty("codeFrame") ? options.codeFrame : true,
     sourceType: options.sourceType,
     allowImportExportEverywhere: options.allowImportExportEverywhere, // consistent with espree
     allowReturnOutsideFunction: true,
@@ -399,7 +399,7 @@ exports.parseNoPatch = function (code, options) {
       err.lineNumber = err.loc.line;
       err.column = err.loc.column;
 
-      if (opts.codeHighlight) {
+      if (opts.codeFrame) {
         err.lineNumber = err.loc.line;
         err.column = err.loc.column + 1;
 
