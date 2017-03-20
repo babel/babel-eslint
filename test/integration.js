@@ -201,13 +201,19 @@ function strictSuite () {
   });
   // describe
   describe("When \"codeFrame\"", () => {
+    // Strip chalk colors, these are not relevant for the test
+    const stripAnsi = (str) => str.replace(
+      /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
+      ""
+    );
+
     it("should display codeFrame when option is absent", (done) => {
       lint({
         fixture: ["syntax-error"],
         eslint: baseEslintOpts
       }, (err, report) => {
         if (err) return done(err);
-        assert(report[0].message.indexOf("^\n  5 |") > -1);
+        assert(stripAnsi(report[0].message).indexOf("^\n  5 |") > -1);
         done();
       });
     });
@@ -222,7 +228,7 @@ function strictSuite () {
         })
       }, (err, report) => {
         if (err) return done(err);
-        assert(report[0].message.indexOf("^\n  5 |") > -1);
+        assert(stripAnsi(report[0].message).indexOf("^\n  5 |") > -1);
         done();
       });
     });
@@ -237,7 +243,7 @@ function strictSuite () {
         })
       }, (err, report) => {
         if (err) return done(err);
-        assert(report[0].message.indexOf("^\n  5 |") === -1);
+        assert(stripAnsi(report[0].message).indexOf("^\n  5 |") === -1);
         done();
       });
     });
