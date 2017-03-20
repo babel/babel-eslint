@@ -19,8 +19,6 @@
     "lodash.pickby": "^4.6.0"
   },
   "scripts": {
-    "bootstrap": "git submodule update --init && cd eslint && npm install",
-    "eslint": "cd eslint && mocha -c tests/lib/rules/*.js -r ../eslint-tester.js",
     "test": "npm run lint && npm run test-only",
     "test-only": "mocha",
     "lint": "eslint index.js babylon-to-espree test",
