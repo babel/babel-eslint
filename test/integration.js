@@ -200,4 +200,46 @@ function strictSuite () {
     // it
   });
   // describe
+  describe("When \"codeFrame\"", () => {
+    it("should display codeFrame when option is absent", (done) => {
+      lint({
+        fixture: ["syntax-error"],
+        eslint: baseEslintOpts
+      }, (err, report) => {
+        if (err) return done(err);
+        assert(report[0].message.indexOf("^\n  5 |") > -1);
+        done();
+      });
+    });
+
+    it("should display codeFrame when option is true", (done) => {
+      lint({
+        fixture: ["syntax-error"],
+        eslint: Object.assign({}, baseEslintOpts, {
+          parserOptions: {
+            codeFrame: true
+          }
+        })
+      }, (err, report) => {
+        if (err) return done(err);
+        assert(report[0].message.indexOf("^\n  5 |") > -1);
+        done();
+      });
+    });
+
+    it("should not display codeFrame when option is false", (done) => {
+      lint({
+        fixture: ["syntax-error"],
+        eslint: Object.assign({}, baseEslintOpts, {
+          parserOptions: {
+            codeFrame: false
+          }
+        })
+      }, (err, report) => {
+        if (err) return done(err);
+        assert(report[0].message.indexOf("^\n  5 |") === -1);
+        done();
+      });
+    });
+  });
 }
