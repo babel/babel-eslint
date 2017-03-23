@@ -105,9 +105,8 @@ function monkeypatch() {
     "RestElement"
   ]);
   var visitorKeysMap = Object.keys(t.VISITOR_KEYS).reduce(function(acc, key) {
-    var value = t.VISITOR_KEYS[key];
-    if (flowFlippedAliasKeys.indexOf(value) === -1) {
-      acc[key] = value;
+    if (flowFlippedAliasKeys.indexOf(key) !== -1) {
+      acc[key] = t.VISITOR_KEYS[key];
     }
     return acc;
   }, {});
