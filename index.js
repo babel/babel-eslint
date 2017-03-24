@@ -1,3 +1,5 @@
+"use strict";
+
 var babylonToEspree = require("./babylon-to-espree");
 var Module          = require("module");
 var path            = require("path");
@@ -10,21 +12,10 @@ var codeFrame       = require("babel-code-frame");
 var hasPatched = false;
 var eslintOptions = {};
 
-function createModule(filename) {
-  var mod = new Module(filename);
-  mod.filename = filename;
-  mod.paths = Module._nodeModulePaths(path.dirname(filename));
-  return mod;
-}
-
-function monkeypatch() {
-  if (hasPatched) return;
-  hasPatched = true;
-
-  var eslintLoc;
+function getModules() {
   try {
     // avoid importing a local copy of eslint, try to find a peer dependency
-    eslintLoc = Module._resolveFilename("eslint", module.parent);
+    var eslintLoc = Module._resolveFilename("eslint", module.parent);
   } catch (err) {
     try {
       // avoids breaking in jest where module.parent is undefined
@@ -35,18 +26,46 @@ function monkeypatch() {
   }
 
   // get modules relative to what eslint will load
-  var eslintMod = createModule(eslintLoc);
-  // ESLint v1.9.0 uses estraverse directly to work around https://github.com/npm/npm/issues/9663
+  var eslintMod = new Module(eslintLoc);
+  eslintMod.filename = eslintLoc;
+  eslintMod.paths = Module._nodeModulePaths(path.dirname(eslintLoc));
+
+  var escope  = eslintMod.require("escope");
+  var Definition = eslintMod.require("escope/lib/definition").Definition;
+  var ParameterDefinition = eslintMod.require("escope/lib/definition").ParameterDefinition;
+  var PatternVisitor = eslintMod.require("escope/lib/pattern-visitor");
+  var referencer = eslintMod.require("escope/lib/referencer");
   var estraverse = eslintMod.require("estraverse");
 
-  Object.assign(estraverse.VisitorKeys, t.VISITOR_KEYS);
-  estraverse.VisitorKeys.MethodDefinition.push("decorators");
-  estraverse.VisitorKeys.Property.push("decorators");
+  if (referencer.__esModule) referencer = referencer.default;
+  if (PatternVisitor.__esModule) PatternVisitor = PatternVisitor.default;
 
-  // monkeypatch escope
-  var escopeLoc = Module._resolveFilename("escope", eslintMod);
-  var escopeMod = createModule(escopeLoc);
-  var escope  = require(escopeLoc);
+  return {
+    estraverse,
+    escope,
+    referencer,
+    Definition,
+    ParameterDefinition,
+    PatternVisitor,
+  };
+}
+
+function monkeypatch(modules) {
+  var estraverse = modules.estraverse;
+  var escope = modules.escope;
+  var referencer = modules.referencer;
+  var Definition = modules.Definition;
+  var ParameterDefinition = modules.ParameterDefinition;
+  var PatternVisitor = modules.PatternVisitor;
+
+  // This estraverse is used by ESLint for traversal in the rules. This is not
+  // the same estraverse used by escope to build the ScopeManager.
+  Object.assign(estraverse.VisitorKeys, t.VISITOR_KEYS);
+  estraverse.VisitorKeys.MethodDefinition
+    = estraverse.VisitorKeys.MethodDefinition.concat("decorators");
+  estraverse.VisitorKeys.Property
+    = estraverse.VisitorKeys.Property.concat("decorators");
+
   var analyze = escope.analyze;
   escope.analyze = function (ast, opts) {
     opts.ecmaVersion = eslintOptions.ecmaVersion;
@@ -54,304 +73,243 @@ function monkeypatch() {
     if (eslintOptions.globalReturn !== undefined) {
       opts.nodejsScope = eslintOptions.globalReturn;
     }
-
+    // escope is (most likely) using a different estraverse than ESLint.
+    // Instead of guessing and trying to find it, simply pass the visitor keys
+    // we want to use:
+    opts.childVisitorKeys = t.VISITOR_KEYS;
     var results = analyze.call(this, ast, opts);
     return results;
   };
 
-  // monkeypatch escope/referencer
-  var referencerLoc;
-  try {
-    referencerLoc = Module._resolveFilename("./referencer", escopeMod);
-  } catch (err) {
-    throw new ReferenceError("couldn't resolve escope/referencer");
-  }
-  var referencerMod = createModule(referencerLoc);
-  var referencer = require(referencerLoc);
-  if (referencer.__esModule) {
-    referencer = referencer.default;
-  }
-
-  // reference Definition
-  var definitionLoc;
-  try {
-    definitionLoc = Module._resolveFilename("./definition", referencerMod);
-  } catch (err) {
-    throw new ReferenceError("couldn't resolve escope/definition");
-  }
-  var Definition = require(definitionLoc).Definition;
-
-  // if there are decorators, then visit each
-  function visitDecorators(node) {
-    if (!node.decorators) {
-      return;
+  // new
+  PatternVisitor.prototype.ObjectPattern = function(node) {
+    if (node.typeAnnotation) {
+      this.rightHandNodes.push(node.typeAnnotation);
     }
-    for (var i = 0; i < node.decorators.length; i++) {
-      if (node.decorators[i].expression) {
-        this.visit(node.decorators[i]);
-      }
-    }
-  }
-
-  // iterate through part of t.VISITOR_KEYS
-  var flowFlippedAliasKeys = t.FLIPPED_ALIAS_KEYS.Flow.concat([
-    "ArrayPattern",
-    "ClassDeclaration",
-    "ClassExpression",
-    "FunctionDeclaration",
-    "FunctionExpression",
-    "Identifier",
-    "ObjectPattern",
-    "RestElement"
-  ]);
-  var visitorKeysMap = Object.keys(t.VISITOR_KEYS).reduce(function(acc, key) {
-    var value = t.VISITOR_KEYS[key];
-    if (flowFlippedAliasKeys.indexOf(value) === -1) {
-      acc[key] = value;
-    }
-    return acc;
-  }, {});
-
-  var propertyTypes = {
-    // loops
-    callProperties: { type: "loop", values: ["value"] },
-    indexers: { type: "loop", values: ["key", "value"] },
-    properties: { type: "loop", values: ["value"] },
-    types: { type: "loop" },
-    params: { type: "loop" },
-    // single property
-    argument: { type: "single" },
-    elementType: { type: "single" },
-    qualification: { type: "single" },
-    rest: { type: "single" },
-    returnType: { type: "single" },
-    // others
-    typeAnnotation: { type: "typeAnnotation" },
-    typeParameters: { type: "typeParameters" },
-    id: { type: "id" }
+    node.properties.forEach(this.visit, this);
   };
 
-  function visitTypeAnnotation(node) {
-    // get property to check (params, id, etc...)
-    var visitorValues = visitorKeysMap[node.type];
-    if (!visitorValues) {
-      return;
+  // override
+  PatternVisitor.prototype.Identifier = function(pattern) {
+    // <custom>
+    if (pattern.typeAnnotation) {
+      this.rightHandNodes.push(pattern.typeAnnotation);
     }
+    // </custom>
+    var lastRestElement = this.restElements[this.restElements.length - 1] || null;
+    this.callback(pattern, {
+      topLevel: pattern === this.rootPattern,
+      rest: lastRestElement != null && lastRestElement.argument === pattern,
+      assignments: this.assignments
+    });
+  };
 
-    // can have multiple properties
-    for (var i = 0; i < visitorValues.length; i++) {
-      var visitorValue = visitorValues[i];
-      var propertyType = propertyTypes[visitorValue];
-      var nodeProperty = node[visitorValue];
-      // check if property or type is defined
-      if (propertyType == null || nodeProperty == null) {
-        continue;
-      }
-      if (propertyType.type === "loop") {
-        for (var j = 0; j < nodeProperty.length; j++) {
-          if (Array.isArray(propertyType.values)) {
-            for (var k = 0; k < propertyType.values.length; k++) {
-              checkIdentifierOrVisit.call(this, nodeProperty[j][propertyType.values[k]]);
-            }
-          } else {
-            checkIdentifierOrVisit.call(this, nodeProperty[j]);
-          }
-        }
-      } else if (propertyType.type === "single") {
-        checkIdentifierOrVisit.call(this, nodeProperty);
-      } else if (propertyType.type === "typeAnnotation") {
-        visitTypeAnnotation.call(this, node.typeAnnotation);
-      } else if (propertyType.type === "typeParameters") {
-        for (var l = 0; l < node.typeParameters.params.length; l++) {
-          checkIdentifierOrVisit.call(this, node.typeParameters.params[l]);
-        }
-      } else if (propertyType.type === "id") {
-        if (node.id.type === "Identifier") {
-          checkIdentifierOrVisit.call(this, node.id);
-        } else {
-          visitTypeAnnotation.call(this, node.id);
-        }
-      }
+  // override
+  PatternVisitor.prototype.ArrayPattern = function(pattern) {
+    // <custom>
+    if (pattern.typeAnnotation) {
+      this.rightHandNodes.push(pattern.typeAnnotation);
+    }
+    // </custom>
+    pattern.elements.forEach(this.visit, this);
+  };
+
+  class TypeParametersScope extends escope.Scope {
+    constructor(scopeManager, upperScope, block) {
+      super(scopeManager, "type-parameters", upperScope, block, false);
     }
   }
 
-  function checkIdentifierOrVisit(node) {
-    if (node.typeAnnotation) {
-      visitTypeAnnotation.call(this, node.typeAnnotation);
-    } else if (node.type === "Identifier") {
-      this.visit(node);
-    } else {
-      visitTypeAnnotation.call(this, node);
-    }
-  }
+  // new
+  escope.ScopeManager.prototype.__nestTypeParamatersScope = function(node) {
+    return this.__nestScope(new TypeParametersScope(this, this.__currentScope, node));
+  };
 
-  function nestTypeParamScope(manager, node) {
-    var parentScope = manager.__currentScope;
-    var scope = new escope.Scope(manager, "type-parameters", parentScope, node, false);
-    manager.__nestScope(scope);
-    for (var j = 0; j < node.typeParameters.params.length; j++) {
-      var name = node.typeParameters.params[j];
-      scope.__define(name, new Definition("TypeParameter", name, name));
-      if (name.typeAnnotation) {
-        checkIdentifierOrVisit.call(this, name);
+  // new
+  referencer.prototype.visitTypeParameterDeclaration = function(node) {
+    for (var i = 0; i < node.params.length; i++) {
+      var param = node.params[i];
+      this.currentScope().__define(
+        param,
+        new Definition("TypeParameter", param, param, node, i, null)
+      );
+      if (param.typeAnnotation) {
+        this.visit(param.typeAnnotation);
       }
     }
-    scope.__define = function() {
-      return parentScope.__define.apply(parentScope, arguments);
-    };
-    return scope;
-  }
+  };
 
-  // visit decorators that are in: ClassDeclaration / ClassExpression
-  var visitClass = referencer.prototype.visitClass;
-  referencer.prototype.visitClass = function(node) {
-    visitDecorators.call(this, node);
-    var typeParamScope;
+  // override
+  referencer.prototype.ClassExpression =
+  referencer.prototype.ClassDeclaration = function(node) {
+    // <custom>
+    if (node.decorators) {
+      node.decorators.forEach(this.visit, this);
+    }
+    // </custom>
+    if (node.type === "ClassDeclaration") {
+      this.currentScope().__define(
+        node.id,
+        new Definition(escope.Variable.ClassName, node.id, node, null, null, null)
+      );
+    }
+    // FIXME: Maybe consider TDZ.
+    this.visit(node.superClass);
+    this.scopeManager.__nestClassScope(node);
+    if (node.id) {
+      this.currentScope().__define(
+        node.id,
+        new Definition(escope.Variable.ClassName, node.id, node)
+      );
+    }
+    // <custom>
     if (node.typeParameters) {
-      typeParamScope = nestTypeParamScope.call(this, this.scopeManager, node);
-    }
-    // visit flow type: ClassImplements
-    if (node.implements) {
-      for (var i = 0; i < node.implements.length; i++) {
-        checkIdentifierOrVisit.call(this, node.implements[i]);
-      }
+      this.scopeManager.__nestTypeParamatersScope(node);
+      this.visitTypeParameterDeclaration(node.typeParameters);
     }
     if (node.superTypeParameters) {
-      for (var k = 0; k < node.superTypeParameters.params.length; k++) {
-        checkIdentifierOrVisit.call(this, node.superTypeParameters.params[k]);
-      }
+      this.visit(node.superTypeParameters);
     }
-    visitClass.call(this, node);
-    if (typeParamScope) {
-      this.close(node);
+    if (node.implements) {
+      node.implements.forEach(this.visit, this);
     }
+    // </custom>
+    this.visit(node.body);
+    this.close(node); // Shared with __nestTypeParamatersScope
   };
 
-  // visit decorators that are in: Property / MethodDefinition
-  var visitProperty = referencer.prototype.visitProperty;
-  referencer.prototype.visitProperty = function(node) {
-    if (node.value && node.value.type === "TypeCastExpression") {
-      visitTypeAnnotation.call(this, node.value);
-    }
-    visitDecorators.call(this, node);
-    visitProperty.call(this, node);
-  };
-
-  // visit ClassProperty as a Property.
-  referencer.prototype.ClassProperty = function(node) {
+  // new
+  referencer.prototype.ClassProperty =
+  // override
+  referencer.prototype.MethodDefinition =
+  referencer.prototype.Property = function(node) {
+    // <custom>
     if (node.typeAnnotation) {
-      visitTypeAnnotation.call(this, node.typeAnnotation);
+      this.visit(node.typeAnnotation);
     }
+    if (node.decorators) {
+      node.decorators.forEach(this.visit, this);
+    }
+    // </custom>
     this.visitProperty(node);
   };
 
-  // visit flow type in FunctionDeclaration, FunctionExpression, ArrowFunctionExpression
-  var visitFunction = referencer.prototype.visitFunction;
-  referencer.prototype.visitFunction = function(node) {
-    var typeParamScope;
+  // new
+  referencer.prototype.Decorator = function(node) {
+    this.visitChildren(node);
+  };
+
+  // override
+  referencer.prototype.FunctionDeclaration =
+  referencer.prototype.FunctionExpression =
+  referencer.prototype.ArrowFunctionExpression = function(node) {
+    // FunctionDeclaration name is defined in upper scope
+    // NOTE: Not referring variableScope. It is intended.
+    // Since
+    //  in ES5, FunctionDeclaration should be in FunctionBody.
+    //  in ES6, FunctionDeclaration should be block scoped.
+    if (node.type === "FunctionDeclaration") {
+      // id is defined in upper scope
+      this.currentScope().__define(
+        node.id,
+        new Definition(escope.Variable.FunctionName, node.id, node, null, null, null)
+      );
+    }
+
+    // FunctionExpression with name creates its special scope;
+    // FunctionExpressionNameScope.
+    if (node.type === "FunctionExpression" && node.id) {
+      this.scopeManager.__nestFunctionExpressionNameScope(node);
+    }
+
+    // Consider this function is in the MethodDefinition.
+    this.scopeManager.__nestFunctionScope(node, this.isInnerMethodDefinition);
+
+    // <custom>
     if (node.typeParameters) {
-      typeParamScope = nestTypeParamScope.call(this, this.scopeManager, node);
+      this.scopeManager.__nestTypeParamatersScope(node);
+      this.visitTypeParameterDeclaration(node.typeParameters);
     }
     if (node.returnType) {
-      checkIdentifierOrVisit.call(this, node.returnType);
+      this.visit(node.returnType);
     }
-    // only visit if function parameters have types
-    if (node.params) {
-      for (var i = 0; i < node.params.length; i++) {
-        var param = node.params[i];
-        if (param.typeAnnotation) {
-          checkIdentifierOrVisit.call(this, param);
-        } else if (t.isAssignmentPattern(param)) {
-          if (param.left.typeAnnotation) {
-            checkIdentifierOrVisit.call(this, param.left);
-          }
+    // </custom>
+
+    // Process parameter declarations.
+    for (var i = 0, iz = node.params.length; i < iz; ++i) {
+      this.visitPattern(
+        node.params[i],
+        { processRightHandNodes: true },
+        (pattern, info) => {
+          this.currentScope().__define(
+            pattern,
+            new ParameterDefinition(pattern, node, i, info.rest)
+          );
+          this.referencingDefaultValue(pattern, info.assignments, null, true);
         }
-      }
+      );
     }
-    // set ArrayPattern/ObjectPattern visitor keys back to their original. otherwise
-    // escope will traverse into them and include the identifiers within as declarations
-    estraverse.VisitorKeys.ObjectPattern = ["properties"];
-    estraverse.VisitorKeys.ArrayPattern = ["elements"];
-    visitFunction.call(this, node);
-    // set them back to normal...
-    estraverse.VisitorKeys.ObjectPattern = t.VISITOR_KEYS.ObjectPattern;
-    estraverse.VisitorKeys.ArrayPattern = t.VISITOR_KEYS.ArrayPattern;
-    if (typeParamScope) {
-      this.close(node);
+
+    // if there's a rest argument, add that
+    if (node.rest) {
+      this.visitPattern({
+        type: "RestElement",
+        argument: node.rest
+      }, (pattern) => {
+        this.currentScope().__define(
+          pattern,
+          new ParameterDefinition(pattern, node, node.params.length, true)
+        );
+      });
     }
+
+    // Skip BlockStatement to prevent creating BlockStatement scope.
+    if (node.body.type === "BlockStatement") {
+      this.visitChildren(node.body);
+    } else {
+      this.visit(node.body);
+    }
+
+    this.close(node); // Shared with __nestTypeParamatersScope
   };
 
-  // visit flow type in VariableDeclaration
-  var variableDeclaration = referencer.prototype.VariableDeclaration;
-  referencer.prototype.VariableDeclaration = function(node) {
-    if (node.declarations) {
-      for (var i = 0; i < node.declarations.length; i++) {
-        var id = node.declarations[i].id;
-        var typeAnnotation = id.typeAnnotation;
-        if (typeAnnotation) {
-          checkIdentifierOrVisit.call(this, typeAnnotation);
-        }
-      }
-    }
-    variableDeclaration.call(this, node);
-  };
-
-  function createScopeVariable (node, name) {
-    this.currentScope().variableScope.__define(name,
-      new Definition(
-        "Variable",
-        name,
-        node,
-        null,
-        null,
-        null
-      )
-    );
-  }
-
-  referencer.prototype.InterfaceDeclaration = function(node) {
-    createScopeVariable.call(this, node, node.id);
-    var typeParamScope;
-    if (node.typeParameters) {
-      typeParamScope = nestTypeParamScope.call(this, this.scopeManager, node);
-    }
-    // TODO: Handle mixins
-    for (var i = 0; i < node.extends.length; i++) {
-      visitTypeAnnotation.call(this, node.extends[i]);
-    }
-    visitTypeAnnotation.call(this, node.body);
-    if (typeParamScope) {
-      this.close(node);
-    }
-  };
-
+  // new
+  referencer.prototype.InterfaceDeclaration =
   referencer.prototype.TypeAlias = function(node) {
-    createScopeVariable.call(this, node, node.id);
-    var typeParamScope;
+    this.currentScope().variableScope.__define(
+      node.id,
+      new Definition("Variable", node.id, node, null, null, null)
+    );
     if (node.typeParameters) {
-      typeParamScope = nestTypeParamScope.call(this, this.scopeManager, node);
+      this.scopeManager.__nestTypeParamatersScope(node);
+      this.visitTypeParameterDeclaration(node.typeParameters);
     }
-    if (node.right) {
-      visitTypeAnnotation.call(this, node.right);
+    if (node.type === "TypeAlias") {
+      this.visit(node.right);
+    } else if (node.type === "InterfaceDeclaration") {
+      // TODO: Handle mixins
+      node.extends.forEach(this.visit, this);
+      this.visit(node.body);
     }
-    if (typeParamScope) {
+    if (node.typeParameters) {
       this.close(node);
     }
   };
 
+  // new
   referencer.prototype.DeclareModule =
   referencer.prototype.DeclareFunction =
   referencer.prototype.DeclareVariable =
   referencer.prototype.DeclareClass = function(node) {
     if (node.id) {
-      createScopeVariable.call(this, node, node.id);
+      this.currentScope().variableScope.__define(
+        node.id,
+        new Definition("Variable", node.id, node, null, null, null)
+      );
     }
-
-    var typeParamScope;
     if (node.typeParameters) {
-      typeParamScope = nestTypeParamScope.call(this, this.scopeManager, node);
-    }
-    if (typeParamScope) {
+      this.scopeManager.__nestTypeParamatersScope(node);
+      this.visitTypeParameterDeclaration(node.typeParameters);
       this.close(node);
     }
   };
@@ -368,11 +326,14 @@ exports.parse = function (code, options) {
     delete eslintOptions.globalReturn;
   }
 
-  try {
-    monkeypatch();
-  } catch (err) {
-    console.error(err.stack);
-    process.exit(1);
+  if (!hasPatched) {
+    hasPatched = true;
+    try {
+      monkeypatch(getModules());
+    } catch (err) {
+      console.error(err.stack);
+      process.exit(1);
+    }
   }
 
   return exports.parseNoPatch(code, options);

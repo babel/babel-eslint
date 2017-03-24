@@ -265,6 +265,28 @@ describe("verify", () => {
       );
     });
 
+    it("type parameter scope #2 (classes)", () => {
+      verifyAndAssertMessages(
+        unpad(`
+          (class C<T: C<*>, U> { t: T; });
+        `),
+        { "no-unused-vars": 1, "no-undef": 1 },
+        [ "1:19 'U' is defined but never used. no-unused-vars" ]
+      );
+    });
+
+    it("type parameter scope #3 (classes)", () => {
+      verifyAndAssertMessages(
+        unpad(`
+          class D {}
+          (class C<T: C<*>, U> extends D<T, V> { });
+        `),
+        { "no-unused-vars": 1, "no-undef": 1 },
+        [ "2:19 'U' is defined but never used. no-unused-vars",
+          "2:35 'V' is not defined. no-undef" ]
+      );
+    });
+
     it("type parameter bounds (interfaces)", () => {
       verifyAndAssertMessages(
         unpad(`
@@ -349,6 +371,16 @@ describe("verify", () => {
         [ "1:1 'T' is not defined. no-undef",
           "2:14 'T' is defined but never used. no-unused-vars",
           "3:1 'T' is not defined. no-undef" ]
+      );
+    });
+
+    it("type parameter scope #2 (functions)", () => {
+      verifyAndAssertMessages(
+        unpad(`
+          (function C<T: C<*>, U>(): T { });
+        `),
+        { "no-unused-vars": 1, "no-undef": 1 },
+        [ "1:22 'U' is defined but never used. no-unused-vars" ]
       );
     });
 
@@ -557,6 +589,35 @@ describe("verify", () => {
         `),
         { "no-unused-vars": 1, "no-undef": 1 },
         [ "2:30 'T' is not defined. no-undef" ]
+      );
+    });
+
+    it("class property decorators + types", () => {
+      verifyAndAssertMessages(
+        unpad(`
+          import T from '';
+          class C {
+            @foo
+            i: T = 0;
+          }
+          new C();
+        `),
+        { "no-unused-vars": 1, "no-undef": 1 },
+        [ "3:4 'foo' is not defined. no-undef" ]
+      );
+    });
+
+    it("class property type cast", () => {
+      verifyAndAssertMessages(
+        unpad(`
+          import {T, i} from '';
+          class C {
+            p = (i: T)
+          }
+          new C();
+        `),
+        { "no-unused-vars": 1, "no-undef": 1 },
+        [ ]
       );
     });
 
@@ -1435,14 +1496,14 @@ describe("verify", () => {
     verifyAndAssertMessages(
       unpad(`
         type ResolveOptionType = {
-        depth?: number,
-        identifier?: string
+          depth?: number,
+          identifier?: string
         };
 
         export default function resolve(
-        options: ResolveOptionType = {}
+          options: ResolveOptionType = {}
         ): Object {
-        options;
+          options;
         }
       `),
       { "no-unused-vars": 1, "no-undef": 1 },
