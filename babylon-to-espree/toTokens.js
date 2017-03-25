@@ -1,3 +1,5 @@
+"use strict";
+
 var convertTemplateType = require("./convertTemplateType");
 var toToken = require("./toToken");
 

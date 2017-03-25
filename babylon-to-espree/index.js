@@ -1,3 +1,5 @@
+"use strict";
+
 var attachComments  = require("./attachComments");
 var convertComments = require("./convertComments");
 var toTokens        = require("./toTokens");

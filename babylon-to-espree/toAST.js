@@ -1,3 +1,5 @@
+"use strict";
+
 var convertComments = require("./convertComments");
 
 module.exports = function (ast, traverse, code) {
