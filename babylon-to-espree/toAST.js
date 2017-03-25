@@ -1,18 +1,16 @@
-var source;
-
 module.exports = function (ast, traverse, code) {
-  source = code;
+  var state = { source: code };
   ast.range = [ast.start, ast.end];
-  traverse(ast, astTransformVisitor);
+  traverse(ast, astTransformVisitor, null, state);
 };
 
-function changeToLiteral(node) {
+function changeToLiteral(node, state) {
   node.type = "Literal";
   if (!node.raw) {
     if (node.extra && node.extra.raw) {
       node.raw = node.extra.raw;
     } else {
-      node.raw = source.slice(node.start, node.end);
+      node.raw = state.source.slice(node.start, node.end);
     }
   }
 }
@@ -55,14 +53,10 @@ var astTransformVisitor = {
     // make '_paths' non-enumerable (babel-eslint #200)
     Object.defineProperty(node, "_paths", { value: node._paths, writable: true });
   },
-  exit (path) {
+  exit (path, state) {
     var node = path.node;
 
-    [
-      fixDirectives,
-    ].forEach((fixer) => {
-      fixer(path);
-    });
+    fixDirectives(path, state);
 
     if (path.isJSXText()) {
       node.type = "Literal";
@@ -71,7 +65,7 @@ var astTransformVisitor = {
 
     if (path.isNumericLiteral() ||
         path.isStringLiteral()) {
-      changeToLiteral(node);
+      changeToLiteral(node, state);
     }
 
     if (path.isBooleanLiteral()) {
@@ -104,7 +98,7 @@ var astTransformVisitor = {
     }
 
     if (path.isClassMethod() || path.isObjectMethod()) {
-      var code = source.slice(node.key.end, node.body.start);
+      var code = state.source.slice(node.key.end, node.body.start);
       var offset = code.indexOf("(");
 
       node.value = {
@@ -230,7 +224,7 @@ var astTransformVisitor = {
 };
 
 
-function fixDirectives (path) {
+function fixDirectives (path, state) {
   if (!(path.isProgram() || path.isFunction())) return;
 
   var node = path.node;
@@ -249,7 +243,7 @@ function fixDirectives (path) {
     directive.expression = directive.value;
     delete directive.value;
     directive.expression.type = "Literal";
-    changeToLiteral(directive.expression);
+    changeToLiteral(directive.expression, state);
     body.unshift(directive);
   });
   delete directivesContainer.directives;
