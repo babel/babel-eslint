@@ -1,3 +1,5 @@
+var convertComments = require("./convertComments");
+
 module.exports = function (ast, traverse, code) {
   var state = { source: code };
   ast.range = [ast.start, ast.end];
@@ -12,18 +14,6 @@ function changeToLiteral(node, state) {
     } else {
       node.raw = state.source.slice(node.start, node.end);
     }
-  }
-}
-
-function changeComments(nodeComments) {
-  for (var i = 0; i < nodeComments.length; i++) {
-    var comment = nodeComments[i];
-    if (comment.type === "CommentLine") {
-      comment.type = "Line";
-    } else if (comment.type === "CommentBlock") {
-      comment.type = "Block";
-    }
-    comment.range = [comment.start, comment.end];
   }
 }
 
@@ -43,11 +33,11 @@ var astTransformVisitor = {
     }
 
     if (node.trailingComments) {
-      changeComments(node.trailingComments);
+      convertComments(node.trailingComments);
     }
 
     if (node.leadingComments) {
-      changeComments(node.leadingComments);
+      convertComments(node.leadingComments);
     }
 
     // make '_paths' non-enumerable (babel-eslint #200)
