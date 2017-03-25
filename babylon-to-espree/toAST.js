@@ -46,7 +46,27 @@ var astTransformVisitor = {
   exit (path, state) {
     var node = path.node;
 
-    fixDirectives(path, state);
+    // fixDirectives
+    if (path.isFunction() || path.isProgram()) {
+      var directivesContainer = node;
+      var body = node.body;
+      if (node.type !== "Program") {
+        directivesContainer = body;
+        body = body.body;
+      }
+      if (directivesContainer.directives) {
+        for (var i = directivesContainer.directives.length - 1; i >= 0; i--) {
+          var directive = directivesContainer.directives[i];
+          directive.type = "ExpressionStatement";
+          directive.expression = directive.value;
+          delete directive.value;
+          directive.expression.type = "Literal";
+          changeToLiteral(directive.expression, state);
+          body.unshift(directive);
+        }
+        delete directivesContainer.directives;
+      }
+    }
 
     if (path.isJSXText()) {
       node.type = "Literal";
@@ -212,30 +232,3 @@ var astTransformVisitor = {
     }
   }
 };
-
-
-function fixDirectives (path, state) {
-  if (!(path.isProgram() || path.isFunction())) return;
-
-  var node = path.node;
-  var directivesContainer = node;
-  var body = node.body;
-
-  if (node.type !== "Program") {
-    directivesContainer = body;
-    body = body.body;
-  }
-
-  if (!directivesContainer.directives) return;
-
-  directivesContainer.directives.reverse().forEach((directive) => {
-    directive.type = "ExpressionStatement";
-    directive.expression = directive.value;
-    delete directive.value;
-    directive.expression.type = "Literal";
-    changeToLiteral(directive.expression, state);
-    body.unshift(directive);
-  });
-  delete directivesContainer.directives;
-}
-// fixDirectives
