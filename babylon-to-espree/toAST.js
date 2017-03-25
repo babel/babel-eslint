@@ -215,7 +215,8 @@ var astTransformVisitor = {
 
     // template string range fixes
     if (path.isTemplateLiteral()) {
-      node.quasis.forEach((q) => {
+      for (var j = 0; j < node.quasis.length; j++) {
+        var q = node.quasis[j];
         q.range[0] -= 1;
         if (q.tail) {
           q.range[1] += 1;
@@ -228,7 +229,7 @@ var astTransformVisitor = {
         } else {
           q.loc.end.column += 2;
         }
-      });
+      }
     }
   }
 };
