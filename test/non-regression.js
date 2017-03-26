@@ -18,7 +18,7 @@ function verifyAndAssertMessages(code, rules, expectedMessages, sourceType, over
         experimentalObjectRestSpread: true,
         globalReturn: true
       },
-      sourceType
+      sourceType: sourceType || "module"
     }
   };
 
@@ -1566,28 +1566,11 @@ describe("verify", () => {
     verifyAndAssertMessages(
       "var leakedGlobal = 1;",
       { "no-implicit-globals": 1 },
-      [],
+      [ "1:5 Implicit global variable, assign as global property instead. no-implicit-globals" ],
       null,
       {
         env: {},
         parserOptions: { ecmaVersion: 6 }
-      }
-    );
-  });
-
-  it("allowImportExportEverywhere option (#327)", () => {
-    verifyAndAssertMessages(
-      unpad(`
-        if (true) { import Foo from 'foo'; }
-        function foo() { import Bar from 'bar'; }
-        switch (a) { case 1: import FooBar from 'foobar'; }
-      `),
-      {},
-      [],
-      "module",
-      {
-        env: {},
-        parserOptions: { ecmaVersion: 6, sourceType: "module", allowImportExportEverywhere: true }
       }
     );
   });

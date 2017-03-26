@@ -66,6 +66,10 @@ $ npm install eslint@3.x babel-eslint@6 --save-dev
 ```json
 {
   "parser": "babel-eslint",
+  "parserOptions": {
+    "ecmaVersion": 8,
+    "sourceType": "module"
+  },
   "rules": {
     "strict": 0
   }
@@ -76,19 +80,42 @@ Check out the [ESLint docs](http://eslint.org/docs/rules/) for all possible rule
 
 ### Configuration
 
-`sourceType` can be set to `'module'`(default) or `'script'` if your code isn't using ECMAScript modules.
-`allowImportExportEverywhere` can be set to true to allow import and export declarations to appear anywhere a statement is allowed if your build environment supports that. By default, import and export declarations can only appear at a program's top level.
-`codeFrame` can be set to false to disable the code frame in the reporter. This is useful since some eslint formatters don't play well with it.
+* `sourceType`, `ecmaVersion`, `ecmaFeatures.globalReturn` and `ecmaFeatures.impliedStrict` should be set in accordance with http://eslint.org/docs/user-guide/configuring#specifying-parser-options.
+  - `ecmaVersion` is disregarded by `babel-eslint`, however, some ESlint rules depend on this value being set correctly.
+  - If `sourceType` is not set to `"module"`, then using `import`/`export` will error.
+* `allowImportExportEverywhere` (default `false`) can be set to `true` to allow import and export declarations to appear anywhere a statement is allowed if your build environment supports that. By default, import and export declarations can only appear at a program's top level.
+* `allowSuperOutsideMethod` (default `true`) can be set to `false` to disallow use of `super` outside of methods. **Note:** Babel's default is `false`.
+* `codeFrame` can be set to false to disable the code frame in the reporter. This is useful since some ESlint formatters don't play well with it.
 
-**.eslintrc**
+#### `.eslintrc`
+
+**Recommended:**
 
 ```json
 {
   "parser": "babel-eslint",
   "parserOptions": {
-    "sourceType": "module",
+    "ecmaVersion": 8,
+    "sourceType": "module"
+  }
+}
+```
+
+**Defaults:**
+
+```json
+{
+  "parser": "babel-eslint",
+  "parserOptions": {
+    "ecmaVersion": 5,
+    "sourceType": "script",
+    "ecmaFeatures": {
+      "globalReturn": false,
+      "impliedStrict": false
+    },
     "allowImportExportEverywhere": false,
-    "codeFrame": false
+    "allowSuperOutsideMethod": true,
+    "codeFrame": true
   }
 }
 ```

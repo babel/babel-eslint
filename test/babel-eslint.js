@@ -40,8 +40,8 @@ function lookup(obj, keypath, backwardsDepth) {
   .reduce((base, segment) => { return base && base[segment], obj; });
 }
 
-function parseAndAssertSame(code) {
-  var esAST = espree.parse(code, {
+function parseAndAssertSame(code, captureParseErrors) {
+  var options = {
     ecmaFeatures: {
         // enable JSX parsing
       jsx: true,
@@ -59,8 +59,27 @@ function parseAndAssertSame(code) {
     attachComment: true,
     ecmaVersion: 8,
     sourceType: "module"
-  });
-  var babylonAST = babelEslint.parse(code);
+  };
+  var errors = { espree: null, babylon: null };
+  try {
+    var esAST = espree.parse(code, options);
+    errors.espree = false;
+  } catch (err) {
+    errors.espree = err;
+  }
+  try {
+    var babylonAST = babelEslint.parse(code, options);
+    errors.babylon = false;
+  } catch (err) {
+    errors.babylon = err;
+  }
+  if (captureParseErrors) {
+    return errors;
+  } else if (errors.espree) {
+    throw errors.espree;
+  } else if (errors.babylon) {
+    throw errors.babylon;
+  }
   try {
     assertImplementsAST(esAST, babylonAST);
   } catch (err) {
@@ -416,10 +435,18 @@ describe("babylon-to-esprima", () => {
       );
     });
 
-    it("do not allow import export everywhere", () => {
+    it("do not allow import export everywhere (espree)", () => {
       assert.throws(() => {
-        parseAndAssertSame("function F() { import a from \"a\"; }");
-      }, /SyntaxError: 'import' and 'export' may only appear at the top level/);
+        var errors = parseAndAssertSame("function F() { import a from \"a\"; }", true);
+        throw errors.espree;
+      }, /'import' and 'export' may only appear at the top level/);
+    });
+
+    it("do not allow import export everywhere (babylon)", () => {
+      assert.throws(() => {
+        var errors = parseAndAssertSame("function F() { import a from \"a\"; }", true);
+        throw errors.babylon;
+      }, /'import' and 'export' may only appear at the top level/);
     });
 
     it("return outside function", () => {

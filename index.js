@@ -8,7 +8,6 @@ var traverse        = require("babel-traverse").default;
 var codeFrame       = require("babel-code-frame");
 
 var hasPatched = false;
-var eslintOptions = {};
 
 function createModule(filename) {
   var mod = new Module(filename);
@@ -49,12 +48,6 @@ function monkeypatch() {
   var escope  = require(escopeLoc);
   var analyze = escope.analyze;
   escope.analyze = function (ast, opts) {
-    opts.ecmaVersion = eslintOptions.ecmaVersion;
-    opts.sourceType = eslintOptions.sourceType;
-    if (eslintOptions.globalReturn !== undefined) {
-      opts.nodejsScope = eslintOptions.globalReturn;
-    }
-
     var results = analyze.call(this, ast, opts);
     return results;
   };
@@ -358,33 +351,23 @@ function monkeypatch() {
 }
 
 exports.parse = function (code, options) {
-  options = options || {};
-  eslintOptions.ecmaVersion = options.ecmaVersion = options.ecmaVersion || 6;
-  eslintOptions.sourceType = options.sourceType = options.sourceType || "module";
-  eslintOptions.allowImportExportEverywhere = options.allowImportExportEverywhere = options.allowImportExportEverywhere || false;
-  if (options.sourceType === "module") {
-    eslintOptions.globalReturn = false;
-  } else {
-    delete eslintOptions.globalReturn;
-  }
-
   try {
     monkeypatch();
   } catch (err) {
     console.error(err.stack);
     process.exit(1);
   }
-
-  return exports.parseNoPatch(code, options);
+  return exports.parseNoPatch(code, options || {});
 };
 
 exports.parseNoPatch = function (code, options) {
+  // Some ESlint APIs (like `getScope()`) and some rules change behavior based
+  // on the values of "ecmaVersion", "sourceType", "globalReturn" and
+  // "impliedStrict" as specified in "parserOptions". For this reason, no
+  // defaults are set that differ from ESlint's own defaults.
   var opts = {
-    codeFrame: options.hasOwnProperty("codeFrame") ? options.codeFrame : true,
+    codeFrame: "codeFrame" in options ? options.codeFrame : true,
     sourceType: options.sourceType,
-    allowImportExportEverywhere: options.allowImportExportEverywhere, // consistent with espree
-    allowReturnOutsideFunction: true,
-    allowSuperOutsideMethod: true,
     plugins: [
       "flow",
       "jsx",
@@ -401,7 +384,19 @@ exports.parseNoPatch = function (code, options) {
       "objectRestSpread",
       "trailingFunctionCommas",
       "dynamicImport"
-    ]
+    ],
+    // espree configurable via "parserOptions":
+    allowReturnOutsideFunction:
+      options.ecmaFeatures &&
+      options.ecmaFeatures.globalReturn || false,
+    strictMode:
+      options.ecmaFeatures &&
+      options.ecmaFeatures.impliedStrict || false,
+    // defaults consistent with espree behavior:
+    allowImportExportEverywhere:
+      options.allowImportExportEverywhere || false,
+    allowSuperOutsideMethod: "allowSuperOutsideMethod" in options ?
+      options.allowSuperOutsideMethod : true,
   };
 
   var ast;
