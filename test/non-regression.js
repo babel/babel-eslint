@@ -206,6 +206,17 @@ describe("verify", () => {
       );
     });
 
+    it("nameless function type param", () => {
+      verifyAndAssertMessages(
+        unpad(`
+          import type Foo from '';
+          type T = (string, b: Foo) => void; T;
+        `),
+        { "no-unused-vars": 1, "no-undef": 1 },
+        []
+      );
+    });
+
     it("multiple nullable type annotations and return #108", () => {
       verifyAndAssertMessages(
         unpad(`
@@ -371,6 +382,27 @@ describe("verify", () => {
         [ "1:1 'T' is not defined. no-undef",
           "2:14 'T' is defined but never used. no-unused-vars",
           "3:1 'T' is not defined. no-undef" ]
+      );
+    });
+
+    it("type parameter bounds with nested function (function type)", () => {
+      verifyAndAssertMessages(
+        unpad(`
+          type T<U> = <V>() => U;
+        `),
+        { "no-unused-vars": 1, "no-undef": 1 },
+        [ "1:6 'T' is defined but never used. no-unused-vars",
+          "1:14 'V' is defined but never used. no-unused-vars" ]
+      );
+    });
+
+    it("type parameter bounds with nested function #2 (function type)", () => {
+      verifyAndAssertMessages(
+        unpad(`
+          type T<U> = <V: T>(a: {b: U}) => V;
+        `),
+        { "no-unused-vars": 1, "no-undef": 1 },
+        [ ]
       );
     });
 
@@ -872,10 +904,11 @@ describe("verify", () => {
           import type Foo from 'foo';
           import type Foo2 from 'foo';
           import type Foo3 from 'foo';
-          var a: { id<Foo>(x: Foo2): Foo3; }; a;
+          var a: { id<Foo, Bar>(x: Foo2, y: Bar): Foo3; }; a;
         `),
         { "no-unused-vars": 1, "no-undef": 1 },
-        []
+        [ "1:13 'Foo' is defined but never used. no-unused-vars",
+          "4:13 'Foo' is defined but never used. no-unused-vars" ]
       );
     });
 
@@ -1043,10 +1076,10 @@ describe("verify", () => {
           import type Foo2 from 'foo';
           import type Foo3 from 'foo';
           import type Foo4 from 'foo';
-          var a: <Foo>(x: Foo2, ...y:Foo3[]) => Foo4; a;
+          var a: <T: Foo>(x: Foo2, ...y:Foo3[]) => Foo4; a;
         `),
         { "no-unused-vars": 1, "no-undef": 1 },
-        []
+        [ "5:9 'T' is defined but never used. no-unused-vars" ]
       );
     });
 

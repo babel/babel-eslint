@@ -136,6 +136,7 @@ function monkeypatch(modules) {
       if (param.typeAnnotation) {
         this.visit(param.typeAnnotation);
       }
+      // TODO: Handle defaults "type T<U = void> = {}"
     }
   };
 
@@ -294,6 +295,34 @@ function monkeypatch(modules) {
     if (node.typeParameters) {
       this.close(node);
     }
+  };
+
+  referencer.prototype.FunctionTypeAnnotation = function(node) {
+    this.scopeManager.__nestFunctionScope(node);
+    if (node.typeParameters) {
+      this.scopeManager.__nestTypeParamatersScope(node);
+      this.visitTypeParameterDeclaration(node.typeParameters);
+    }
+    if (node.returnType) {
+      this.visit(node.returnType);
+    }
+    for (var i = 0, iz = node.params.length; i < iz; ++i) {
+      this.visitPattern(
+        node.params[i],
+        (pattern) => {
+          this.visit(pattern);
+        }
+      );
+    }
+    if (node.rest) {
+      this.visitPattern({
+        type: "RestElement",
+        argument: node.rest
+      }, (pattern) => {
+        this.visit(pattern);
+      });
+    }
+    this.close(node);
   };
 
   // new
