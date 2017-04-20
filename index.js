@@ -5,7 +5,7 @@ var parse           = require("babylon").parse;
 var t               = require("babel-types");
 var tt              = require("babylon").tokTypes;
 var traverse        = require("babel-traverse").default;
-var codeFrame       = require("babel-code-frame");
+var codeFrame       = require("babel-code-frame").default;
 
 var hasPatched = false;
 var eslintOptions = {};
@@ -103,6 +103,9 @@ function monkeypatch(modules) {
     return acc;
   }, {});
 
+  visitorKeysMap["ExperimentalRestProperty"] = visitorKeysMap["RestElement"];
+  visitorKeysMap["ExperimentalSpreadProperty"] = visitorKeysMap["SpreadElement"];
+
   var propertyTypes = {
     // loops
     callProperties: { type: "loop", values: ["value"] },
@@ -129,6 +132,7 @@ function monkeypatch(modules) {
       return;
     }
 
+
     // can have multiple properties
     for (var i = 0; i < visitorValues.length; i++) {
       var visitorValue = visitorValues[i];
@@ -138,6 +142,7 @@ function monkeypatch(modules) {
       if (propertyType == null || nodeProperty == null) {
         continue;
       }
+
       if (propertyType.type === "loop") {
         for (var j = 0; j < nodeProperty.length; j++) {
           if (Array.isArray(propertyType.values)) {
