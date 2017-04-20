@@ -107,7 +107,7 @@ function monkeypatch(modules) {
     // loops
     callProperties: { type: "loop", values: ["value"] },
     indexers: { type: "loop", values: ["key", "value"] },
-    properties: { type: "loop", values: ["value"] },
+    properties: { type: "props" },
     types: { type: "loop" },
     params: { type: "loop" },
     // single property
@@ -138,6 +138,7 @@ function monkeypatch(modules) {
       if (propertyType == null || nodeProperty == null) {
         continue;
       }
+
       if (propertyType.type === "loop") {
         for (var j = 0; j < nodeProperty.length; j++) {
           if (Array.isArray(propertyType.values)) {
@@ -146,6 +147,16 @@ function monkeypatch(modules) {
             }
           } else {
             checkIdentifierOrVisit.call(this, nodeProperty[j]);
+          }
+        }
+      } else if (propertyType.type === 'props') {
+        // Props may have either .value or .argument depending on element type. 
+        for (var j = 0; j < nodeProperty.length; j++) {
+          const currentNodeProperty = nodeProperty[j];
+          if (currentNodeProperty.argument) {
+            visitTypeAnnotation.call(this, currentNodeProperty);
+          } else {
+            checkIdentifierOrVisit.call(this, currentNodeProperty.value);
           }
         }
       } else if (propertyType.type === "single") {
