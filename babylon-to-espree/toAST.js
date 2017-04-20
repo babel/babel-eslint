@@ -165,8 +165,14 @@ var astTransformVisitor = {
       delete node.typeParameters;
     }
 
-    if (path.isRestProperty() || path.isSpreadProperty()) {
-      node.type = `Experimental${node.type}`;
+    // both type and isRestProperty check are needed. We only want the exact
+    // (Rest|Spread) Node and not a parent node.
+    if (node.type === "RestElement" && path.isRestProperty()) {
+      node.type = "ExperimentalRestProperty";
+    }
+
+    if (node.type === "SpreadElement" && path.isSpreadProperty()) {
+      node.type = "ExperimentalSpreadProperty";
     }
 
     if (path.isTypeParameter && path.isTypeParameter()) {

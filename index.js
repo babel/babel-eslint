@@ -5,7 +5,7 @@ var parse           = require("babylon").parse;
 var t               = require("babel-types");
 var tt              = require("babylon").tokTypes;
 var traverse        = require("babel-traverse").default;
-var codeFrame       = require("babel-code-frame");
+var codeFrame       = require("babel-code-frame").default;
 
 var hasPatched = false;
 var eslintOptions = {};
@@ -103,11 +103,15 @@ function monkeypatch(modules) {
     return acc;
   }, {});
 
+  visitorKeysMap["ExperimentalRestProperty"] = visitorKeysMap["RestElement"];
+  visitorKeysMap["ExperimentalSpreadProperty"] = visitorKeysMap["SpreadElement"];
+  visitorKeysMap["ObjectTypeSpreadProperty"] = ["argument"];
+
   var propertyTypes = {
     // loops
     callProperties: { type: "loop", values: ["value"] },
     indexers: { type: "loop", values: ["key", "value"] },
-    properties: { type: "loop", values: ["value"] },
+    properties: { type: "props" },
     types: { type: "loop" },
     params: { type: "loop" },
     // single property
@@ -129,6 +133,7 @@ function monkeypatch(modules) {
       return;
     }
 
+
     // can have multiple properties
     for (var i = 0; i < visitorValues.length; i++) {
       var visitorValue = visitorValues[i];
@@ -138,6 +143,7 @@ function monkeypatch(modules) {
       if (propertyType == null || nodeProperty == null) {
         continue;
       }
+
       if (propertyType.type === "loop") {
         for (var j = 0; j < nodeProperty.length; j++) {
           if (Array.isArray(propertyType.values)) {
@@ -146,6 +152,16 @@ function monkeypatch(modules) {
             }
           } else {
             checkIdentifierOrVisit.call(this, nodeProperty[j]);
+          }
+        }
+      } else if (propertyType.type === "props") {
+        // Props may have either .value or .argument depending on element type.
+        for (var x = 0; x < nodeProperty.length; x++) {
+          var currentNodeProperty = nodeProperty[x];
+          if (currentNodeProperty.argument) {
+            visitTypeAnnotation.call(this, currentNodeProperty);
+          } else {
+            checkIdentifierOrVisit.call(this, currentNodeProperty.value);
           }
         }
       } else if (propertyType.type === "single") {
