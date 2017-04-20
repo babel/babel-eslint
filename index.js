@@ -105,12 +105,13 @@ function monkeypatch(modules) {
 
   visitorKeysMap["ExperimentalRestProperty"] = visitorKeysMap["RestElement"];
   visitorKeysMap["ExperimentalSpreadProperty"] = visitorKeysMap["SpreadElement"];
+  visitorKeysMap["ObjectTypeSpreadProperty"] = ["argument"];
 
   var propertyTypes = {
     // loops
     callProperties: { type: "loop", values: ["value"] },
     indexers: { type: "loop", values: ["key", "value"] },
-    properties: { type: "loop", values: ["value"] },
+    properties: { type: "props" },
     types: { type: "loop" },
     params: { type: "loop" },
     // single property
@@ -151,6 +152,16 @@ function monkeypatch(modules) {
             }
           } else {
             checkIdentifierOrVisit.call(this, nodeProperty[j]);
+          }
+        }
+      } else if (propertyType.type === "props") {
+        // Props may have either .value or .argument depending on element type.
+        for (var x = 0; x < nodeProperty.length; x++) {
+          var currentNodeProperty = nodeProperty[x];
+          if (currentNodeProperty.argument) {
+            visitTypeAnnotation.call(this, currentNodeProperty);
+          } else {
+            checkIdentifierOrVisit.call(this, currentNodeProperty.value);
           }
         }
       } else if (propertyType.type === "single") {
