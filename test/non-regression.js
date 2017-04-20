@@ -1124,6 +1124,18 @@ describe("verify", () => {
     });
   });
 
+  it("flow type spread", () => {
+    verifyAndAssertMessages(
+      unpad(`
+        import Foo from 'foo';
+        type Bar = { x: string, ...Foo };
+        Bar;
+      `),
+      { "no-unused-vars": 1, "no-undef": 1 },
+      []
+    );
+  });
+
   it("class usage", () => {
     verifyAndAssertMessages(
       "class Lol {} module.exports = Lol;",
