@@ -165,8 +165,12 @@ var astTransformVisitor = {
       delete node.typeParameters;
     }
 
-    if (path.isRestProperty() || path.isSpreadProperty()) {
-      node.type = `Experimental${node.type}`;
+    if (node.type !== 'Property' && path.isRestProperty()) {
+      node.type = `ExperimentalRestProperty`;
+    }
+
+    if (node.type !== 'Property' && path.isSpreadProperty()) {
+      node.type = `ExperimentalSpreadProperty`;
     }
 
     if (path.isTypeParameter && path.isTypeParameter()) {
