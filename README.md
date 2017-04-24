@@ -31,6 +31,8 @@ Please check out [eslint-plugin-react](https://github.com/yannickcr/eslint-plugi
 
 Please check out [eslint-plugin-babel](https://github.com/babel/eslint-plugin-babel) for other issues
 
+> Currently the `ecmaFeatures` options from `eslint` are **not** supported by the `acorn` parser and thus are ignored.
+
 ## How does it work?
 
 ESLint allows custom parsers. This is great but some of the syntax nodes that Babel supports
