@@ -5,7 +5,7 @@ var parse           = require("babylon").parse;
 var t               = require("babel-types");
 var tt              = require("babylon").tokTypes;
 var traverse        = require("babel-traverse").default;
-var codeFrame       = require("babel-code-frame").default;
+var codeFrameColumns = require("babel-code-frame").codeFrameColumns;
 
 var hasPatched = false;
 var eslintOptions = {};
@@ -422,7 +422,7 @@ exports.parseNoPatch = function (code, options) {
         err.message = "Line " + err.lineNumber + ": " + err.message.replace(/ \((\d+):(\d+)\)$/, "") +
         // add codeframe
         "\n\n" +
-        codeFrame(code, {
+        codeFrameColumns(code, {
           start: {
             line: err.lineNumber,
             column: err.column,
