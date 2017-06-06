@@ -422,13 +422,12 @@ exports.parseNoPatch = function (code, options) {
         err.message = "Line " + err.lineNumber + ": " + err.message.replace(/ \((\d+):(\d+)\)$/, "") +
         // add codeframe
         "\n\n" +
-        const loc = {
+        codeFrame(code, {
           start: {
             line: err.lineNumber,
             column: err.column,
           },
-        };
-        codeFrame(code, loc, { highlightCode: true });
+        }, { highlightCode: true });
       }
     }
 
