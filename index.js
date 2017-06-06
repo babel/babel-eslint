@@ -5,7 +5,7 @@ var parse           = require("babylon").parse;
 var t               = require("babel-types");
 var tt              = require("babylon").tokTypes;
 var traverse        = require("babel-traverse").default;
-var codeFrame       = require("babel-code-frame");
+var codeFrame       = require("babel-code-frame").default;
 
 var hasPatched = false;
 var eslintOptions = {};
