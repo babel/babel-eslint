@@ -397,7 +397,11 @@ exports.parseNoPatch = function (code, options) {
       "functionSent",
       "objectRestSpread",
       "trailingFunctionCommas",
-      "dynamicImport"
+      "dynamicImport",
+      "numericSeparator",
+      "optionalChaining",
+      "importMeta",
+      "classPrivateProperties",
     ]
   };
 
@@ -418,7 +422,13 @@ exports.parseNoPatch = function (code, options) {
         err.message = "Line " + err.lineNumber + ": " + err.message.replace(/ \((\d+):(\d+)\)$/, "") +
         // add codeframe
         "\n\n" +
-        codeFrame(code, err.lineNumber, err.column, { highlightCode: true });
+        const loc = {
+          start: {
+            line: err.lineNumber,
+            column: err.column,
+          },
+        };
+        codeFrame(code, loc, { highlightCode: true });
       }
     }
 
