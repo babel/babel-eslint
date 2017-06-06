@@ -231,13 +231,18 @@ function monkeypatch(modules) {
     visitProperty.call(this, node);
   };
 
-  // visit ClassProperty as a Property.
-  referencer.prototype.ClassProperty = function(node) {
+  function visitClassProperty(node) {
     if (node.typeAnnotation) {
       visitTypeAnnotation.call(this, node.typeAnnotation);
     }
     this.visitProperty(node);
-  };
+  }
+
+  // visit ClassProperty as a Property.
+  referencer.prototype.ClassProperty = visitClassProperty;
+
+  // visit ClassPrivateProperty as a Property.
+  referencer.prototype.ClassPrivateProperty = visitClassProperty;
 
   // visit flow type in FunctionDeclaration, FunctionExpression, ArrowFunctionExpression
   var visitFunction = referencer.prototype.visitFunction;
