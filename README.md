@@ -57,6 +57,8 @@ Ensure that you have substituted the correct version lock for `eslint` and `babe
 
 ```sh
 $ npm install eslint@3.x babel-eslint@7 --save-dev
+# or
+$ yarn add eslint@3.x babel-eslint@y -D
 ```
 
 ### Setup
