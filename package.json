@@ -38,7 +38,7 @@
   "devDependencies": {
     "babel-eslint": "^8.0.0-alpha.13",
     "dedent": "^0.7.0",
-    "eslint": "^4.1.0",
+    "eslint": "git://github.com/eslint/eslint.git#1372549f2378f467749336e17b8fcd8219d52cfb",
     "eslint-config-babel": "^7.0.1",
     "eslint-plugin-flowtype": "^2.30.3",
     "eslint-plugin-prettier": "^2.1.2",
