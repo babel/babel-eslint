@@ -106,10 +106,9 @@ function parseForESLintAndAssertSame(code) {
     `);
     throw err;
   }
-  // assert.equal(esAST, babylonAST);
 }
 
-describe("parseForESLint: babylon-to-esprima", () => {
+describe("parseForESLint: babylon-to-espree", () => {
   describe("compatibility", () => {
     it("should allow ast.analyze to be called without options", function() {
       var esAST = babelEslint.parseForESLint("`test`").ast;
