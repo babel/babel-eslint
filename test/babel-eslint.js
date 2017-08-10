@@ -60,7 +60,7 @@ function lookup(obj, keypath, backwardsDepth) {
     });
 }
 
-function parseAndAssertSame(code) {
+function parseForESLintAndAssertSame(code) {
   var esAST = espree.parse(code, {
     ecmaFeatures: {
       // enable JSX parsing
@@ -80,7 +80,8 @@ function parseAndAssertSame(code) {
     ecmaVersion: 8,
     sourceType: "module",
   });
-  var babylonAST = babelEslint.parse(code);
+  var babylonResult = babelEslint.parseForESLint(code);
+  var babylonAST = babylonResult.ast;
   try {
     assertImplementsAST(esAST, babylonAST);
   } catch (err) {
@@ -108,10 +109,10 @@ function parseAndAssertSame(code) {
   // assert.equal(esAST, babylonAST);
 }
 
-describe("babylon-to-esprima", () => {
+describe("parseForESLint: babylon-to-esprima", () => {
   describe("compatibility", () => {
     it("should allow ast.analyze to be called without options", function() {
-      var esAST = babelEslint.parse("`test`");
+      var esAST = babelEslint.parseForESLint("`test`").ast;
 
       assert.doesNotThrow(
         () => {
@@ -125,59 +126,59 @@ describe("babylon-to-esprima", () => {
 
   describe("templates", () => {
     it("empty template string", () => {
-      parseAndAssertSame("``");
+      parseForESLintAndAssertSame("``");
     });
 
     it("template string", () => {
-      parseAndAssertSame("`test`");
+      parseForESLintAndAssertSame("`test`");
     });
 
     it("template string using $", () => {
-      parseAndAssertSame("`$`");
+      parseForESLintAndAssertSame("`$`");
     });
 
     it("template string with expression", () => {
-      parseAndAssertSame("`${a}`");
+      parseForESLintAndAssertSame("`${a}`");
     });
 
     it("template string with multiple expressions", () => {
-      parseAndAssertSame("`${a}${b}${c}`");
+      parseForESLintAndAssertSame("`${a}${b}${c}`");
     });
 
     it("template string with expression and strings", () => {
-      parseAndAssertSame("`a${a}a`");
+      parseForESLintAndAssertSame("`a${a}a`");
     });
 
     it("template string with binary expression", () => {
-      parseAndAssertSame("`a${a + b}a`");
+      parseForESLintAndAssertSame("`a${a + b}a`");
     });
 
     it("tagged template", () => {
-      parseAndAssertSame("jsx`<Button>Click</Button>`");
+      parseForESLintAndAssertSame("jsx`<Button>Click</Button>`");
     });
 
     it("tagged template with expression", () => {
-      parseAndAssertSame("jsx`<Button>Hi ${name}</Button>`");
+      parseForESLintAndAssertSame("jsx`<Button>Hi ${name}</Button>`");
     });
 
     it("tagged template with new operator", () => {
-      parseAndAssertSame("new raw`42`");
+      parseForESLintAndAssertSame("new raw`42`");
     });
 
     it("template with nested function/object", () => {
-      parseAndAssertSame(
+      parseForESLintAndAssertSame(
         "`outer${{x: {y: 10}}}bar${`nested${function(){return 1;}}endnest`}end`"
       );
     });
 
     it("template with braces inside and outside of template string #96", () => {
-      parseAndAssertSame(
+      parseForESLintAndAssertSame(
         "if (a) { var target = `{}a:${webpackPort}{}}}}`; } else { app.use(); }"
       );
     });
 
     it("template also with braces #96", () => {
-      parseAndAssertSame(
+      parseForESLintAndAssertSame(
         unpad(`
           export default function f1() {
             function f2(foo) {
@@ -191,7 +192,7 @@ describe("babylon-to-esprima", () => {
     });
 
     it("template with destructuring #31", () => {
-      parseAndAssertSame(
+      parseForESLintAndAssertSame(
         unpad(`
           module.exports = {
             render() {
@@ -205,103 +206,103 @@ describe("babylon-to-esprima", () => {
   });
 
   it("simple expression", () => {
-    parseAndAssertSame("a = 1");
+    parseForESLintAndAssertSame("a = 1");
   });
 
   it("class declaration", () => {
-    parseAndAssertSame("class Foo {}");
+    parseForESLintAndAssertSame("class Foo {}");
   });
 
   it("class expression", () => {
-    parseAndAssertSame("var a = class Foo {}");
+    parseForESLintAndAssertSame("var a = class Foo {}");
   });
 
   it("jsx expression", () => {
-    parseAndAssertSame("<App />");
+    parseForESLintAndAssertSame("<App />");
   });
 
   it("jsx expression with 'this' as identifier", () => {
-    parseAndAssertSame("<this />");
+    parseForESLintAndAssertSame("<this />");
   });
 
   it("jsx expression with a dynamic attribute", () => {
-    parseAndAssertSame("<App foo={bar} />");
+    parseForESLintAndAssertSame("<App foo={bar} />");
   });
 
   it("jsx expression with a member expression as identifier", () => {
-    parseAndAssertSame("<foo.bar />");
+    parseForESLintAndAssertSame("<foo.bar />");
   });
 
   it("jsx expression with spread", () => {
-    parseAndAssertSame("var myDivElement = <div {...this.props} />;");
+    parseForESLintAndAssertSame("var myDivElement = <div {...this.props} />;");
   });
 
   it("empty jsx text", () => {
-    parseAndAssertSame("<a></a>");
+    parseForESLintAndAssertSame("<a></a>");
   });
 
   it("jsx text with content", () => {
-    parseAndAssertSame("<a>Hello, world!</a>");
+    parseForESLintAndAssertSame("<a>Hello, world!</a>");
   });
 
   it("nested jsx", () => {
-    parseAndAssertSame("<div>\n<h1>Wat</h1>\n</div>");
+    parseForESLintAndAssertSame("<div>\n<h1>Wat</h1>\n</div>");
   });
 
   it("default import", () => {
-    parseAndAssertSame('import foo from "foo";');
+    parseForESLintAndAssertSame('import foo from "foo";');
   });
 
   it("import specifier", () => {
-    parseAndAssertSame('import { foo } from "foo";');
+    parseForESLintAndAssertSame('import { foo } from "foo";');
   });
 
   it("import specifier with name", () => {
-    parseAndAssertSame('import { foo as bar } from "foo";');
+    parseForESLintAndAssertSame('import { foo as bar } from "foo";');
   });
 
   it("import bare", () => {
-    parseAndAssertSame('import "foo";');
+    parseForESLintAndAssertSame('import "foo";');
   });
 
   it("export default class declaration", () => {
-    parseAndAssertSame("export default class Foo {}");
+    parseForESLintAndAssertSame("export default class Foo {}");
   });
 
   it("export default class expression", () => {
-    parseAndAssertSame("export default class {}");
+    parseForESLintAndAssertSame("export default class {}");
   });
 
   it("export default function declaration", () => {
-    parseAndAssertSame("export default function Foo() {}");
+    parseForESLintAndAssertSame("export default function Foo() {}");
   });
 
   it("export default function expression", () => {
-    parseAndAssertSame("export default function () {}");
+    parseForESLintAndAssertSame("export default function () {}");
   });
 
   it("export all", () => {
-    parseAndAssertSame('export * from "foo";');
+    parseForESLintAndAssertSame('export * from "foo";');
   });
 
   it("export named", () => {
-    parseAndAssertSame("export { foo };");
+    parseForESLintAndAssertSame("export { foo };");
   });
 
   it("export named alias", () => {
-    parseAndAssertSame("export { foo as bar };");
+    parseForESLintAndAssertSame("export { foo as bar };");
   });
 
   it.skip("empty program with line comment", () => {
-    parseAndAssertSame("// single comment");
+    parseForESLintAndAssertSame("// single comment");
   });
 
   it.skip("empty program with block comment", () => {
-    parseAndAssertSame("  /* multiline\n * comment\n*/");
+    parseForESLintAndAssertSame("  /* multiline\n * comment\n*/");
   });
 
   it("line comments", () => {
-    parseAndAssertSame(
+    parseForESLintAndAssertSame(
       unpad(`
         // single comment
         var foo = 15; // comment next to statement
@@ -311,7 +312,7 @@ describe("babylon-to-esprima", () => {
   });
 
   it("block comments", () => {
-    parseAndAssertSame(
+    parseForESLintAndAssertSame(
       unpad(`
         /* single comment */
         var foo = 15; /* comment next to statement */
@@ -324,7 +325,7 @@ describe("babylon-to-esprima", () => {
   });
 
   it("block comments #124", () => {
-    parseAndAssertSame(
+    parseForESLintAndAssertSame(
       unpad(`
         React.createClass({
           render() {
@@ -338,43 +339,43 @@ describe("babylon-to-esprima", () => {
   });
 
   it("null", () => {
-    parseAndAssertSame("null");
+    parseForESLintAndAssertSame("null");
   });
 
   it("boolean", () => {
-    parseAndAssertSame("if (true) {} else if (false) {}");
+    parseForESLintAndAssertSame("if (true) {} else if (false) {}");
   });
 
   it("regexp", () => {
-    parseAndAssertSame("/affix-top|affix-bottom|affix|[a-z]/");
+    parseForESLintAndAssertSame("/affix-top|affix-bottom|affix|[a-z]/");
   });
 
   it("regexp", () => {
-    parseAndAssertSame("const foo = /foo/;");
+    parseForESLintAndAssertSame("const foo = /foo/;");
   });
 
   it("regexp y flag", () => {
-    parseAndAssertSame("const foo = /foo/y;");
+    parseForESLintAndAssertSame("const foo = /foo/y;");
   });
 
   it("regexp u flag", () => {
-    parseAndAssertSame("const foo = /foo/u;");
+    parseForESLintAndAssertSame("const foo = /foo/u;");
   });
 
   it("regexp in a template string", () => {
-    parseAndAssertSame('`${/\\d/.exec("1")[0]}`');
+    parseForESLintAndAssertSame('`${/\\d/.exec("1")[0]}`');
   });
 
   it("first line is empty", () => {
-    parseAndAssertSame('\nimport Immutable from "immutable";');
+    parseForESLintAndAssertSame('\nimport Immutable from "immutable";');
   });
 
   it("empty", () => {
-    parseAndAssertSame("");
+    parseForESLintAndAssertSame("");
   });
 
   it("jsdoc", () => {
-    parseAndAssertSame(
+    parseForESLintAndAssertSame(
       unpad(`
         /**
         * @param {object} options
@@ -389,7 +390,7 @@ describe("babylon-to-esprima", () => {
   });
 
   it("empty block with comment", () => {
-    parseAndAssertSame(
+    parseForESLintAndAssertSame(
       unpad(`
         function a () {
           try {
@@ -404,7 +405,7 @@ describe("babylon-to-esprima", () => {
 
   describe("babel tests", () => {
     it("MethodDefinition", () => {
-      parseAndAssertSame(
+      parseForESLintAndAssertSame(
         unpad(`
           export default class A {
             a() {}
@@ -414,13 +415,13 @@ describe("babylon-to-esprima", () => {
     });
 
     it("MethodDefinition 2", () => {
-      parseAndAssertSame(
+      parseForESLintAndAssertSame(
         "export default class Bar { get bar() { return 42; }}"
       );
     });
 
     it("ClassMethod", () => {
-      parseAndAssertSame(
+      parseForESLintAndAssertSame(
         unpad(`
           class A {
             constructor() {
@@ -431,7 +432,7 @@ describe("babylon-to-esprima", () => {
     });
 
     it("ClassMethod multiple params", () => {
-      parseAndAssertSame(
+      parseForESLintAndAssertSame(
         unpad(`
           class A {
             constructor(a, b, c) {
@@ -442,7 +443,7 @@ describe("babylon-to-esprima", () => {
     });
 
     it("ClassMethod multiline", () => {
-      parseAndAssertSame(
+      parseForESLintAndAssertSame(
         unpad(`
           class A {
             constructor (
@@ -460,11 +461,11 @@ describe("babylon-to-esprima", () => {
     });
 
     it("ClassMethod oneline", () => {
-      parseAndAssertSame("class A { constructor(a, b, c) {} }");
+      parseForESLintAndAssertSame("class A { constructor(a, b, c) {} }");
     });
 
     it("ObjectMethod", () => {
-      parseAndAssertSame(
+      parseForESLintAndAssertSame(
         unpad(`
           var a = {
             b(c) {
@@ -476,27 +477,27 @@ describe("babylon-to-esprima", () => {
 
     it("do not allow import export everywhere", () => {
       assert.throws(() => {
-        parseAndAssertSame('function F() { import a from "a"; }');
+        parseForESLintAndAssertSame('function F() { import a from "a"; }');
       }, /SyntaxError: 'import' and 'export' may only appear at the top level/);
     });
 
     it("return outside function", () => {
-      parseAndAssertSame("return;");
+      parseForESLintAndAssertSame("return;");
     });
 
     it("super outside method", () => {
-      parseAndAssertSame("function F() { super(); }");
+      parseForESLintAndAssertSame("function F() { super(); }");
     });
 
     it("StringLiteral", () => {
-      parseAndAssertSame("");
-      parseAndAssertSame("");
-      parseAndAssertSame("a");
+      parseForESLintAndAssertSame("");
+      parseForESLintAndAssertSame("");
+      parseForESLintAndAssertSame("a");
     });
 
     it("getters and setters", () => {
-      parseAndAssertSame("class A { get x ( ) { ; } }");
-      parseAndAssertSame(
+      parseForESLintAndAssertSame("class A { get x ( ) { ; } }");
+      parseForESLintAndAssertSame(
         unpad(`
           class A {
             get x(
@@ -507,8 +508,8 @@ describe("babylon-to-esprima", () => {
           }
         `)
       );
-      parseAndAssertSame("class A { set x (a) { ; } }");
-      parseAndAssertSame(
+      parseForESLintAndAssertSame("class A { set x (a) { ; } }");
+      parseForESLintAndAssertSame(
         unpad(`
           class A {
             set x(a
@@ -519,7 +520,7 @@ describe("babylon-to-esprima", () => {
           }
         `)
       );
-      parseAndAssertSame(
+      parseForESLintAndAssertSame(
         unpad(`
           var B = {
             get x () {
@@ -534,19 +535,19 @@ describe("babylon-to-esprima", () => {
     });
 
     it("RestOperator", () => {
-      parseAndAssertSame("var { a, ...b } = c");
-      parseAndAssertSame("var [ a, ...b ] = c");
-      parseAndAssertSame("var a = function (...b) {}");
+      parseForESLintAndAssertSame("var { a, ...b } = c");
+      parseForESLintAndAssertSame("var [ a, ...b ] = c");
+      parseForESLintAndAssertSame("var a = function (...b) {}");
     });
 
     it("SpreadOperator", () => {
-      parseAndAssertSame("var a = { b, ...c }");
-      parseAndAssertSame("var a = [ a, ...b ]");
-      parseAndAssertSame("var a = sum(...b)");
+      parseForESLintAndAssertSame("var a = { b, ...c }");
+      parseForESLintAndAssertSame("var a = [ a, ...b ]");
+      parseForESLintAndAssertSame("var a = sum(...b)");
     });
 
     it("Async/Await", () => {
-      parseAndAssertSame(
+      parseForESLintAndAssertSame(
         unpad(`
           async function a() {
             await 1;

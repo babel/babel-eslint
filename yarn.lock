@@ -492,9 +492,9 @@ eslint-scope@^3.7.1:
     esrecurse "^4.1.0"
     estraverse "^4.1.1"
 
-"eslint@git://github.com/eslint/eslint.git#1372549f2378f467749336e17b8fcd8219d52cfb":
+"eslint@git://github.com/eslint/eslint.git#b6542d3f3b0b007ab19dbdb9a8eb1f224c479ec8":
   version "4.4.1"
-  resolved "git://github.com/eslint/eslint.git#1372549f2378f467749336e17b8fcd8219d52cfb"
+  resolved "git://github.com/eslint/eslint.git#b6542d3f3b0b007ab19dbdb9a8eb1f224c479ec8"
   dependencies:
     ajv "^5.2.0"
     babel-code-frame "^6.22.0"

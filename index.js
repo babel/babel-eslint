@@ -1,21 +1,15 @@
 "use strict";
 
-var parse = require("babylon").parse;
-var VISITOR_KEYS = require("babel-types").VISITOR_KEYS;
-var tt = require("babylon").tokTypes;
-var traverse = require("babel-traverse").default;
-var codeFrameColumns = require("babel-code-frame").codeFrameColumns;
-
 /**
- * Utils
+ * Lib helpers
  */
-var babylonToEspree = require("./babylon-to-espree");
-var makeEnhancedReferencer = require("./utils/make-enhanced-referencer");
-var monkeypatch = require("./utils/monkeypatch");
-var getESLintModules = require("./utils/get-eslint-modules");
+var parseWithBabylon = require("./lib/parse-with-babylon");
+var makeEnhancedReferencer = require("./lib/make-enhanced-referencer");
+var getESLintModules = require("./lib/get-eslint-modules");
+var extendDefaultVisitorKeys = require("./lib/extend-default-visitor-keys");
 
 /**
- * Get the ESLint-related modules
+ * Dynamically look up the ESLint-related modules
  */
 var modules = getESLintModules();
 var Traverser = modules.Traverser;
@@ -25,15 +19,13 @@ var ScopeManager = modules.ScopeManager;
  * Configure extendedVisitorKeys, based on the default keys from ESLint and the
  * VISITOR_KEYS from babel-types
  */
-var DEFAULT_VISITOR_KEYS = Traverser.DEFAULT_VISITOR_KEYS;
-var extendedVisitorKeys = Object.assign({}, DEFAULT_VISITOR_KEYS, VISITOR_KEYS);
-extendedVisitorKeys.MethodDefinition.push("decorators");
-extendedVisitorKeys.Property.push("decorators");
+var extendedVisitorKeys = extendDefaultVisitorKeys(
+  Traverser.DEFAULT_VISITOR_KEYS
+);
 
 /**
  * Globals
  */
-var hasPatched = false;
 var eslintOptions = {};
 var EnhancedReferencer = makeEnhancedReferencer(modules, extendedVisitorKeys);
 
@@ -49,6 +41,8 @@ function ensureDefaultParserOptions(options) {
   parserOptions.sourceType = options.sourceType || "module";
   parserOptions.allowImportExportEverywhere =
     options.allowImportExportEverywhere || false;
+  parserOptions.allowReturnOutsideFunction =
+    options.allowReturnOutsideFunction || true;
   return parserOptions;
 }
 
@@ -59,41 +53,15 @@ function ensureDefaultParserOptions(options) {
  * @returns {void}
  */
 function setESLintOptions(parserOptions) {
+  eslintOptions = eslintOptions || {};
   eslintOptions.ecmaVersion = parserOptions.ecmaVersion;
   eslintOptions.sourceType = parserOptions.sourceType;
-  eslintOptions.allowImportExportEverywhere =
+  eslintOptions.ecmaFeatures = eslintOptions.ecmaFeatures || {};
+  eslintOptions.ecmaFeatures.allowImportExportEverywhere =
     parserOptions.allowImportExportEverywhere;
-  if (parserOptions.sourceType === "module") {
-    eslintOptions.globalReturn = false;
-  } else {
-    delete eslintOptions.globalReturn;
-  }
+  eslintOptions.ecmaFeatures.globalReturn =
+    parserOptions.allowReturnOutsideFunction;
 }
-
-/**
- * Standard parse() method which returns an AST, based on the given source code
- * and parser options.
- *
- * @param {String} code Source code
- * @param {Object} options Parser options
- * @returns {Object} AST
- */
-exports.parse = function parse(code, options) {
-  var parserOptions = ensureDefaultParserOptions(options);
-  setESLintOptions(parserOptions);
-
-  if (!hasPatched) {
-    hasPatched = true;
-    try {
-      monkeypatch(modules, eslintOptions);
-    } catch (err) {
-      console.error(err.stack);
-      process.exit(1);
-    }
-  }
-
-  return exports.parseNoPatch(code, parserOptions);
-};
 
 /**
  * Special parseForESLint() method which returns an object which contains the AST,
@@ -107,22 +75,18 @@ exports.parseForESLint = function parseForESLint(code, options) {
   var parserOptions = ensureDefaultParserOptions(options);
   setESLintOptions(parserOptions);
 
-  if (!hasPatched) {
-    hasPatched = true;
-  }
-
   function analyzeScope(ast) {
     var eslintScopeOptions = {
       ignoreEval: true,
-      impliedStrict: eslintOptions.impliedStrict,
+      impliedStrict: eslintOptions.ecmaFeatures.impliedStrict,
       sourceType: eslintOptions.sourceType,
       ecmaVersion: eslintOptions.ecmaVersion,
       childVisitorKeys: extendedVisitorKeys,
       fallback: Traverser.getKeys,
     };
 
-    if (eslintOptions.globalReturn !== undefined) {
-      eslintOptions.nodejsScope = eslintOptions.globalReturn;
+    if (eslintOptions.ecmaFeatures.globalReturn !== undefined) {
+      eslintScopeOptions.nodejsScope = eslintOptions.ecmaFeatures.globalReturn;
     }
 
     var scopeManager = new ScopeManager(eslintScopeOptions);
@@ -133,94 +97,11 @@ exports.parseForESLint = function parseForESLint(code, options) {
     return scopeManager;
   }
 
-  var ast = exports.parseNoPatch(code, parserOptions);
+  var ast = parseWithBabylon(code, parserOptions);
 
   return {
     ast,
     visitorKeys: extendedVisitorKeys,
-    scope: analyzeScope(ast),
+    scopeManager: analyzeScope(ast),
   };
-};
-
-/**
- * Method to parse the given source code using Babylon, based on the given parser
- * options, and return an Espree-formatted (ESTree) AST.
- * 
- * @param {String} code Source code
- * @param {Object} options Parser options
- * @returns {Object} AST
- */
-exports.parseNoPatch = function parseNoPatch(code, options) {
-  var opts = {
-    codeFrame: options.hasOwnProperty("codeFrame") ? options.codeFrame : true,
-    sourceType: options.sourceType,
-    allowImportExportEverywhere: options.allowImportExportEverywhere, // consistent with espree
-    allowReturnOutsideFunction: true,
-    allowSuperOutsideMethod: true,
-    ranges: true,
-    tokens: true,
-    plugins: [
-      "flow",
-      "jsx",
-      "estree",
-      "asyncFunctions",
-      "asyncGenerators",
-      "classConstructorCall",
-      "classProperties",
-      "decorators",
-      "doExpressions",
-      "exponentiationOperator",
-      "exportExtensions",
-      "functionBind",
-      "functionSent",
-      "objectRestSpread",
-      "trailingFunctionCommas",
-      "dynamicImport",
-      "numericSeparator",
-      "optionalChaining",
-      "importMeta",
-      "classPrivateProperties",
-      "bigInt",
-    ],
-  };
-
-  var ast;
-  try {
-    ast = parse(code, opts);
-  } catch (err) {
-    if (err instanceof SyntaxError) {
-      err.lineNumber = err.loc.line;
-      err.column = err.loc.column;
-
-      if (opts.codeFrame) {
-        err.lineNumber = err.loc.line;
-        err.column = err.loc.column + 1;
-
-        // remove trailing "(LINE:COLUMN)" acorn message and add in esprima syntax error message start
-        err.message =
-          "Line " +
-          err.lineNumber +
-          ": " +
-          err.message.replace(/ \((\d+):(\d+)\)$/, "") +
-          // add codeframe
-          "\n\n" +
-          codeFrameColumns(
-            code,
-            {
-              start: {
-                line: err.lineNumber,
-                column: err.column,
-              },
-            },
-            { highlightCode: true }
-          );
-      }
-    }
-
-    throw err;
-  }
-
-  babylonToEspree(ast, traverse, tt, code);
-
-  return ast;
 };
