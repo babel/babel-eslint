@@ -1,33 +1,18 @@
 "use strict";
 
+var eslintScope = require("eslint-scope");
+
 /**
  * Lib helpers
  */
 var parseWithBabylon = require("./lib/parse-with-babylon");
-var makeEnhancedReferencer = require("./lib/make-enhanced-referencer");
-var getESLintModules = require("./lib/get-eslint-modules");
-var extendDefaultVisitorKeys = require("./lib/extend-default-visitor-keys");
-
-/**
- * Dynamically look up the ESLint-related modules
- */
-var modules = getESLintModules();
-var Traverser = modules.Traverser;
-var ScopeManager = modules.ScopeManager;
-
-/**
- * Configure extendedVisitorKeys, based on the default keys from ESLint and the
- * VISITOR_KEYS from babel-types
- */
-var extendedVisitorKeys = extendDefaultVisitorKeys(
-  Traverser.DEFAULT_VISITOR_KEYS
-);
+var EnhancedReferencer = require("./lib/enhanced-referencer");
+var extendedVisitorKeys = require("./lib/extended-visitor-keys");
 
 /**
  * Globals
  */
 var eslintOptions = {};
-var EnhancedReferencer = makeEnhancedReferencer(modules, extendedVisitorKeys);
 
 /**
  * Ensure that reasonable default parser options are set.
@@ -76,21 +61,21 @@ exports.parseForESLint = function parseForESLint(code, options) {
   setESLintOptions(parserOptions);
 
   function analyzeScope(ast) {
-    var eslintScopeOptions = {
+    var scopeOptions = {
       ignoreEval: true,
       impliedStrict: eslintOptions.ecmaFeatures.impliedStrict,
       sourceType: eslintOptions.sourceType,
       ecmaVersion: eslintOptions.ecmaVersion,
       childVisitorKeys: extendedVisitorKeys,
-      fallback: Traverser.getKeys,
+      fallback: eslintScope.Traverser.getKeys,
     };
 
     if (eslintOptions.ecmaFeatures.globalReturn !== undefined) {
-      eslintScopeOptions.nodejsScope = eslintOptions.ecmaFeatures.globalReturn;
+      scopeOptions.nodejsScope = eslintOptions.ecmaFeatures.globalReturn;
     }
 
-    var scopeManager = new ScopeManager(eslintScopeOptions);
-    var referencer = new EnhancedReferencer(eslintScopeOptions, scopeManager);
+    var scopeManager = new eslintScope.ScopeManager(scopeOptions);
+    var referencer = new EnhancedReferencer(scopeOptions, scopeManager);
 
     referencer.visit(ast);
 
@@ -104,4 +89,10 @@ exports.parseForESLint = function parseForESLint(code, options) {
     visitorKeys: extendedVisitorKeys,
     scopeManager: analyzeScope(ast),
   };
+};
+
+exports.parse = function parse() {
+  throw new Error(
+    "babel-eslint does not expose a general parse() method, it is designed to be used with ESLint, so you should use parseForESLint() instead."
+  );
 };

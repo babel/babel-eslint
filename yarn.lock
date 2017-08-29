@@ -94,9 +94,9 @@ babel-code-frame@7.0.0-alpha.12:
     esutils "^2.0.2"
     js-tokens "^3.0.0"
 
-babel-code-frame@7.0.0-alpha.17:
-  version "7.0.0-alpha.17"
-  resolved "https://registry.yarnpkg.com/babel-code-frame/-/babel-code-frame-7.0.0-alpha.17.tgz#06a5daddb0946d8e95392477065a86480474f19c"
+babel-code-frame@7.0.0-alpha.19:
+  version "7.0.0-alpha.19"
+  resolved "https://registry.yarnpkg.com/babel-code-frame/-/babel-code-frame-7.0.0-alpha.19.tgz#18afb43ec147847cc55f79bad4dab08f938263b1"
   dependencies:
     chalk "^2.0.0"
     esutils "^2.0.2"
@@ -127,14 +127,14 @@ babel-eslint@^8.0.0-alpha.13:
     babel-types "7.0.0-alpha.12"
     babylon "7.0.0-beta.14"
 
-babel-helper-function-name@7.0.0-alpha.17:
-  version "7.0.0-alpha.17"
-  resolved "https://registry.yarnpkg.com/babel-helper-function-name/-/babel-helper-function-name-7.0.0-alpha.17.tgz#b976290af579712345ecd6a146e6dff86b47b8ed"
+babel-helper-function-name@7.0.0-alpha.19:
+  version "7.0.0-alpha.19"
+  resolved "https://registry.yarnpkg.com/babel-helper-function-name/-/babel-helper-function-name-7.0.0-alpha.19.tgz#6da459bdbc17fc2bb6a623fbcbfc57dc4ab20e9f"
   dependencies:
-    babel-helper-get-function-arity "7.0.0-alpha.17"
-    babel-template "7.0.0-alpha.17"
-    babel-traverse "7.0.0-alpha.17"
-    babel-types "7.0.0-alpha.17"
+    babel-helper-get-function-arity "7.0.0-alpha.19"
+    babel-template "7.0.0-alpha.19"
+    babel-traverse "7.0.0-alpha.19"
+    babel-types "7.0.0-alpha.19"
 
 babel-helper-function-name@7.0.0-alpha.7:
   version "7.0.0-alpha.7"
@@ -145,11 +145,11 @@ babel-helper-function-name@7.0.0-alpha.7:
     babel-traverse "7.0.0-alpha.7"
     babel-types "7.0.0-alpha.7"
 
-babel-helper-get-function-arity@7.0.0-alpha.17:
-  version "7.0.0-alpha.17"
-  resolved "https://registry.yarnpkg.com/babel-helper-get-function-arity/-/babel-helper-get-function-arity-7.0.0-alpha.17.tgz#f9ee3be4b6e892235ee790a8849ada1f88eedcf1"
+babel-helper-get-function-arity@7.0.0-alpha.19:
+  version "7.0.0-alpha.19"
+  resolved "https://registry.yarnpkg.com/babel-helper-get-function-arity/-/babel-helper-get-function-arity-7.0.0-alpha.19.tgz#29088a3137935e393f09a329d9d7900360514e4e"
   dependencies:
-    babel-types "7.0.0-alpha.17"
+    babel-types "7.0.0-alpha.19"
 
 babel-helper-get-function-arity@7.0.0-alpha.7:
   version "7.0.0-alpha.7"
@@ -161,20 +161,20 @@ babel-messages@7.0.0-alpha.12:
   version "7.0.0-alpha.12"
   resolved "https://registry.yarnpkg.com/babel-messages/-/babel-messages-7.0.0-alpha.12.tgz#5fda840cb8dfeda06a7894a1e8ab1af695f249c0"
 
-babel-messages@7.0.0-alpha.17:
-  version "7.0.0-alpha.17"
-  resolved "https://registry.yarnpkg.com/babel-messages/-/babel-messages-7.0.0-alpha.17.tgz#777d7f82656d5e3526c1f4c74aaaba99b260d7db"
+babel-messages@7.0.0-alpha.19:
+  version "7.0.0-alpha.19"
+  resolved "https://registry.yarnpkg.com/babel-messages/-/babel-messages-7.0.0-alpha.19.tgz#269b34b85070be6f6d101169ed3fdafc856dfd06"
 
 babel-messages@7.0.0-alpha.3:
   version "7.0.0-alpha.3"
   resolved "https://registry.yarnpkg.com/babel-messages/-/babel-messages-7.0.0-alpha.3.tgz#c8390a468478b8384da134612e12a6bc31a684e9"
 
-babel-template@7.0.0-alpha.17:
-  version "7.0.0-alpha.17"
-  resolved "https://registry.yarnpkg.com/babel-template/-/babel-template-7.0.0-alpha.17.tgz#085597c0021644c72fa74460a8f76a85e76da943"
+babel-template@7.0.0-alpha.19:
+  version "7.0.0-alpha.19"
+  resolved "https://registry.yarnpkg.com/babel-template/-/babel-template-7.0.0-alpha.19.tgz#6ef867c43dbf8c204a22f9cfd62101c64c8ade9c"
   dependencies:
-    babel-traverse "7.0.0-alpha.17"
-    babel-types "7.0.0-alpha.17"
+    babel-traverse "7.0.0-alpha.19"
+    babel-types "7.0.0-alpha.19"
     babylon "7.0.0-beta.18"
     lodash "^4.2.0"
 
@@ -201,15 +201,15 @@ babel-traverse@7.0.0-alpha.12:
     invariant "^2.2.0"
     lodash "^4.2.0"
 
-babel-traverse@7.0.0-alpha.17:
-  version "7.0.0-alpha.17"
-  resolved "https://registry.yarnpkg.com/babel-traverse/-/babel-traverse-7.0.0-alpha.17.tgz#c8a33788274bc4138c529ec9c29f0bacb573f42c"
+babel-traverse@7.0.0-alpha.19:
+  version "7.0.0-alpha.19"
+  resolved "https://registry.yarnpkg.com/babel-traverse/-/babel-traverse-7.0.0-alpha.19.tgz#083f3f00a413fd9ec38383c0d5ae79511d9ed53d"
   dependencies:
-    babel-code-frame "7.0.0-alpha.17"
-    babel-helper-function-name "7.0.0-alpha.17"
-    babel-messages "7.0.0-alpha.17"
-    babel-types "7.0.0-alpha.17"
-    babylon "7.0.0-beta.18"
+    babel-code-frame "7.0.0-alpha.19"
+    babel-helper-function-name "7.0.0-alpha.19"
+    babel-messages "7.0.0-alpha.19"
+    babel-types "7.0.0-alpha.19"
+    babylon "7.0.0-beta.19"
     debug "^2.2.0"
     globals "^10.0.0"
     invariant "^2.2.0"
@@ -236,9 +236,9 @@ babel-types@7.0.0-alpha.12:
     lodash "^4.2.0"
     to-fast-properties "^1.0.1"
 
-babel-types@7.0.0-alpha.17:
-  version "7.0.0-alpha.17"
-  resolved "https://registry.yarnpkg.com/babel-types/-/babel-types-7.0.0-alpha.17.tgz#bc74e19423b015a5ce88727440fc6ae863463dc0"
+babel-types@7.0.0-alpha.19:
+  version "7.0.0-alpha.19"
+  resolved "https://registry.yarnpkg.com/babel-types/-/babel-types-7.0.0-alpha.19.tgz#8222ae72f349c51758a9451486783a7b9bffc605"
   dependencies:
     esutils "^2.0.2"
     lodash "^4.2.0"
@@ -263,6 +263,14 @@ babylon@7.0.0-beta.14:
 babylon@7.0.0-beta.18:
   version "7.0.0-beta.18"
   resolved "https://registry.yarnpkg.com/babylon/-/babylon-7.0.0-beta.18.tgz#5c23ee3fdb66358aabf3789779319c5b78a233c7"
+
+babylon@7.0.0-beta.19:
+  version "7.0.0-beta.19"
+  resolved "https://registry.yarnpkg.com/babylon/-/babylon-7.0.0-beta.19.tgz#e928c7e807e970e0536b078ab3e0c48f9e052503"
+
+babylon@7.0.0-beta.22:
+  version "7.0.0-beta.22"
+  resolved "https://registry.yarnpkg.com/babylon/-/babylon-7.0.0-beta.22.tgz#74f0ad82ed7c7c3cfeab74cf684f815104161b65"
 
 babylon@7.0.0-beta.8:
   version "7.0.0-beta.8"
@@ -488,6 +496,13 @@ eslint-plugin-prettier@^2.1.2:
 eslint-scope@^3.7.1:
   version "3.7.1"
   resolved "https://registry.yarnpkg.com/eslint-scope/-/eslint-scope-3.7.1.tgz#3d63c3edfda02e06e01a452ad88caacc7cdcb6e8"
+  dependencies:
+    esrecurse "^4.1.0"
+    estraverse "^4.1.1"
+
+"eslint-scope@git://github.com/eslint/eslint-scope.git#4f0f8c878fd9a2440e1c6c3e05b6981a9494a156":
+  version "3.7.1"
+  resolved "git://github.com/eslint/eslint-scope.git#4f0f8c878fd9a2440e1c6c3e05b6981a9494a156"
   dependencies:
     esrecurse "^4.1.0"
     estraverse "^4.1.1"
