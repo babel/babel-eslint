@@ -392,7 +392,7 @@ exports.parseNoPatch = function(code, options) {
     allowSuperOutsideMethod: true,
     ranges: true,
     tokens: true,
-    plugins: [
+    plugins: options.plugins || [
       "flow",
       "jsx",
       "estree",
