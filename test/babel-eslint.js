@@ -29,8 +29,9 @@ function assertImplementsAST(target, source, path) {
     target.constructor.name !== source.constructor.name
   ) {
     error(
-      `object have different constructors (${target.constructor
-        .name} !== ${source.constructor.name}`
+      `object have different constructors (${target.constructor.name} !== ${
+        source.constructor.name
+      }`
     );
   } else if (typeA === "object") {
     var keysTarget = Object.keys(target);
@@ -151,6 +152,10 @@ describe("babylon-to-esprima", () => {
 
     it("template string with binary expression", () => {
       parseAndAssertSame("`a${a + b}a`");
+    });
+
+    it("template string with object with template string inside", () => {
+      parseAndAssertSame("`${ { a:`${2}` } }`");
     });
 
     it("tagged template", () => {
