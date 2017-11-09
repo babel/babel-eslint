@@ -1,25 +1,53 @@
 "use strict";
 
 module.exports = function(tokens, tt) {
-  var startingToken = 0;
-  var currentToken = 0;
-  var numBraces = 0; // track use of {}
-  var numBackQuotes = 0; // track number of nested templates
+  const contextStack = [{ inTemplate: false, numBraces: 0 }];
+  let contextIndex = 0;
+  const getContext = () => contextStack[contextIndex];
 
-  function isBackQuote(token) {
-    return tokens[token].type === tt.backQuote;
-  }
+  for (let index = 0; index < tokens.length; index++) {
+    const token = tokens[index];
+    const context = getContext();
 
-  function isTemplateStarter(token) {
-    return (
-      isBackQuote(token) ||
-      // only can be a template starter when in a template already
-      (tokens[token].type === tt.braceR && numBackQuotes > 0)
-    );
-  }
+    if (context.inTemplate) {
+      // We are in a template…
+      const isTemplateEnder =
+        token.type === tt.dollarBraceL || token.type === tt.backQuote;
+      if (isTemplateEnder) {
+        if (token.type === tt.dollarBraceL) {
+          contextIndex++;
+          if (!contextStack[contextIndex]) {
+            contextStack[contextIndex] = { numBraces: 0, inTemplate: false };
+          }
+        } else {
+          contextIndex--;
+        }
 
-  function isTemplateEnder(token) {
-    return isBackQuote(token) || tokens[token].type === tt.dollarBraceL;
+        // We have a complete template token :)
+        const { index: startIndex } = context;
+        replaceWithTemplateType(startIndex, index);
+        index = startIndex;
+      }
+    } else {
+      // We are out of a template…
+      const isTemplateStarter =
+        token.type === tt.backQuote ||
+        (context.numBraces === 0 && token.type === tt.braceR);
+
+      if (isTemplateStarter) {
+        if (token.type === tt.backQuote) {
+          contextIndex++;
+          contextStack[contextIndex] = { index, inTemplate: true };
+        } else {
+          contextIndex--;
+        }
+        contextStack[contextIndex].index = index;
+      } else if (token.type === tt.braceL) {
+        context.numBraces++;
+      } else if (token.type === tt.braceR) {
+        context.numBraces--;
+      }
+    }
   }
 
   // append the values between start and end
@@ -51,49 +79,5 @@ module.exports = function(tokens, tt) {
 
     // put new token in place of old tokens
     tokens.splice(start, end - start + 1, templateToken);
-  }
-
-  function trackNumBraces(token) {
-    if (tokens[token].type === tt.braceL) {
-      numBraces++;
-    } else if (tokens[token].type === tt.braceR) {
-      numBraces--;
-    }
-  }
-
-  while (startingToken < tokens.length) {
-    // template start: check if ` or }
-    if (isTemplateStarter(startingToken) && numBraces === 0) {
-      if (isBackQuote(startingToken)) {
-        numBackQuotes++;
-      }
-
-      currentToken = startingToken + 1;
-
-      // check if token after template start is "template"
-      if (
-        currentToken >= tokens.length - 1 ||
-        tokens[currentToken].type !== tt.template
-      ) {
-        break;
-      }
-
-      // template end: find ` or ${
-      while (!isTemplateEnder(currentToken)) {
-        if (currentToken >= tokens.length - 1) {
-          break;
-        }
-        currentToken++;
-      }
-
-      if (isBackQuote(currentToken)) {
-        numBackQuotes--;
-      }
-      // template start and end found: create new token
-      replaceWithTemplateType(startingToken, currentToken);
-    } else if (numBackQuotes > 0) {
-      trackNumBraces(startingToken);
-    }
-    startingToken++;
   }
 };
