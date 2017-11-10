@@ -36,7 +36,7 @@ module.exports = function(tokens, tt) {
   for (let index = 0; index < tokens.length; index++) {
     const token = tokens[index];
 
-    if (contextStack.current().inTemplate) {
+    if (contextStack.current().isTemplate) {
       // We are in a template…
 
       // If we encounter a '${' or a '`', we go out of template (string) mode and create
@@ -71,7 +71,7 @@ module.exports = function(tokens, tt) {
         // an embedded expression '${...}'), so we go back to the previous context.
         contextStack.popContext();
         contextStack.current().startIndex = index;
-        // Note that `contextStack[contextIndex].isTemplate` is already `true`.
+        // Note that `contextStack.current().isTemplate` is already `true`.
       } else if (token.type === tt.braceL) {
         // In the case we encounter a '{', we increment the current number of openened braces.
         contextStack.current().numBraces++;
@@ -97,12 +97,12 @@ module.exports = function(tokens, tt) {
       // Push a new template context on the stack. We store the index
       // of the starting token to use it when creating the template token.
       pushNewTemplateContext(startIndex) {
-        this._stack.push({ startIndex, inTemplate: true });
+        this._stack.push({ startIndex, isTemplate: true });
       },
 
       // Push a new non-template context on the stack.
       pushNewNonTemplateContext() {
-        this._stack.push({ numBraces: 0, inTemplate: false });
+        this._stack.push({ numBraces: 0, isTemplate: false });
       },
 
       // Pop the context at the top of the stack, i.e. goes back to the
