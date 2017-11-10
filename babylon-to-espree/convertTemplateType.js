@@ -8,6 +8,7 @@
 //     beginning of the next one…
 //   * and so on till end of the template string, the last token containing
 //     the closing backquote.
+//
 // Examples: (the resulting template tokens are underlined with successive '^')
 //   var a = `Result: ${result}.`;
 //           ^^^^^^^^^^^      ^^^
@@ -43,12 +44,12 @@ module.exports = function(tokens, tt) {
       if (token.type === tt.dollarBraceL) {
         // If '${', then we begin a new expression with its own context. This means that
         // we add a new context to the stack, and define it as the current context.
-        index = createTemplateTokenAndReturnNewIndex(index, token);
+        index = createTemplateTokenAndReturnNewIndex(index);
         contextStack.pushNewNonTemplateContext();
       } else if (token.type === tt.backQuote) {
         // If '`', then we go back to the previous expression (the one before the template
         // string began). We restore the previous context, with its numOfBraces.
-        index = createTemplateTokenAndReturnNewIndex(index, token);
+        index = createTemplateTokenAndReturnNewIndex(index);
         contextStack.popContext();
       }
 
@@ -114,7 +115,7 @@ module.exports = function(tokens, tt) {
 
   // Create a template token to aggregate previous tokens, and returns
   // the new current index.
-  function createTemplateTokenAndReturnNewIndex(index, token) {
+  function createTemplateTokenAndReturnNewIndex(index) {
     const startIndex = contextStack.current().startIndex;
     replaceWithTemplateType(startIndex, index);
     return startIndex;
@@ -124,10 +125,7 @@ module.exports = function(tokens, tt) {
   function getValueForTokens(start, end) {
     const tokenToString = token =>
       token.value || (token.type !== tt.template ? token.type.label : "");
-    return tokens
-      .slice(start, end + 1)
-      .map(tokenToString)
-      .join("");
+    return tokens.slice(start, end + 1).map(tokenToString).join("");
   }
 
   // Create a new template token by aggregating tokens from `start` to `end`, and

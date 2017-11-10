@@ -29,9 +29,8 @@ function assertImplementsAST(target, source, path) {
     target.constructor.name !== source.constructor.name
   ) {
     error(
-      `object have different constructors (${target.constructor.name} !== ${
-        source.constructor.name
-      }`
+      `object have different constructors (${target.constructor
+        .name} !== ${source.constructor.name}`
     );
   } else if (typeA === "object") {
     var keysTarget = Object.keys(target);
