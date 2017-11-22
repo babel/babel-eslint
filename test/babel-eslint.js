@@ -118,7 +118,7 @@ describe("babylon-to-esprima", () => {
       var esAST = babelEslint.parseForESLint("`test`", {
         eslintScopeManager: true,
         eslintVisitorKeys: true,
-      });
+      }).ast;
 
       assert.doesNotThrow(
         () => {
