@@ -153,6 +153,10 @@ describe("babylon-to-esprima", () => {
       parseAndAssertSame("`a${a + b}a`");
     });
 
+    it("template string with object with template string inside", () => {
+      parseAndAssertSame("`${ { a:`${2}` } }`");
+    });
+
     it("tagged template", () => {
       parseAndAssertSame("jsx`<Button>Click</Button>`");
     });
