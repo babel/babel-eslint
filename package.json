@@ -39,7 +39,7 @@
   "devDependencies": {
     "babel-eslint": "^8.0.0",
     "dedent": "^0.7.0",
-    "eslint": "github:eslint/eslint#improve-parser-integrations",
+    "eslint": "^4.12.1",
     "eslint-config-babel": "^7.0.1",
     "eslint-plugin-flowtype": "^2.30.3",
     "eslint-plugin-prettier": "^2.1.2",
