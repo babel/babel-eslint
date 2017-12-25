@@ -539,4 +539,16 @@ describe("Public API", () => {
       babelEslint.parseNoPatch("foo", {})
     );
   });
+
+  it("still provides a custom scope with parseForESLint after calling parse()", () => {
+    assertImplementsAST(
+      espree.parse("foo", { sourceType: "module" }),
+      babelEslint.parse("foo", {})
+    );
+    const parseForESLintResult = babelEslint.parseForESLint("foo", {
+      eslintVisitorKeys: true,
+      eslintScopeManager: true,
+    });
+    assert(parseForESLintResult.visitorKeys);
+  });
 });
