@@ -1,14 +1,16 @@
 /*eslint-env mocha*/
 "use strict";
 var eslint = require("eslint");
+var oldEslint = require("eslint-old");
 var unpad = require("dedent");
 
-function verifyAndAssertMessages(
+function verifyAndAssertMessagesWithSpecificESLint(
   code,
   rules,
   expectedMessages,
   sourceType,
-  overrideConfig
+  overrideConfig,
+  linter
 ) {
   var config = {
     parser: require.resolve(".."),
@@ -34,7 +36,7 @@ function verifyAndAssertMessages(
     }
   }
 
-  var messages = eslint.linter.verify(code, config);
+  var messages = linter.verify(code, config);
 
   if (messages.length !== expectedMessages.length) {
     throw new Error(
@@ -59,6 +61,25 @@ function verifyAndAssertMessages(
         `)
       );
     }
+  });
+}
+
+function verifyAndAssertMessages(
+  code,
+  rules,
+  expectedMessages,
+  sourceType,
+  overrideConfig
+) {
+  [new eslint.Linter(), new oldEslint.Linter()].forEach(linter => {
+    verifyAndAssertMessagesWithSpecificESLint(
+      code,
+      rules,
+      expectedMessages,
+      sourceType,
+      overrideConfig,
+      linter
+    );
   });
 }
 
