@@ -4,48 +4,7 @@ var espree = require("espree");
 var escope = require("eslint-scope");
 var util = require("util");
 var unpad = require("dedent");
-
-// Checks if the source ast implements the target ast. Ignores extra keys on source ast
-function assertImplementsAST(target, source, path) {
-  if (!path) {
-    path = [];
-  }
-
-  function error(text) {
-    var err = new Error(`At ${path.join(".")}: ${text}:`);
-    err.depth = path.length + 1;
-    throw err;
-  }
-
-  var typeA = target === null ? "null" : typeof target;
-  var typeB = source === null ? "null" : typeof source;
-  if (typeA !== typeB) {
-    error(
-      `have different types (${typeA} !== ${typeB}) (${target} !== ${source})`
-    );
-  } else if (
-    typeA === "object" &&
-    ["RegExp"].indexOf(target.constructor.name) !== -1 &&
-    target.constructor.name !== source.constructor.name
-  ) {
-    error(
-      `object have different constructors (${target.constructor
-        .name} !== ${source.constructor.name}`
-    );
-  } else if (typeA === "object") {
-    var keysTarget = Object.keys(target);
-    for (var i in keysTarget) {
-      var key = keysTarget[i];
-      path.push(key);
-      assertImplementsAST(target[key], source[key], path);
-      path.pop();
-    }
-  } else if (target !== source) {
-    error(
-      `are different (${JSON.stringify(target)} !== ${JSON.stringify(source)})`
-    );
-  }
-}
+var assertImplementsAST = require("./fixtures/assert-implements-ast");
 
 function lookup(obj, keypath, backwardsDepth) {
   if (!keypath) {
@@ -538,32 +497,5 @@ describe("Public API", () => {
       espree.parse("foo"),
       babelEslint.parseNoPatch("foo", {})
     );
-  });
-
-  /*
-   * This test ensures that the enhanced referencer does not get used if eslint-scope has already been
-   * monkeypatched, because this causes some correctness issues. For example, if the enhanced referencer
-   * is used after the original referencer is monkeypatched, type annotation references are counted twice.
-   */
-  it("does not visit type annotations multiple times after monkeypatching and calling parseForESLint()", () => {
-    assertImplementsAST(
-      espree.parse("foo", { sourceType: "module" }),
-      babelEslint.parse("foo", {})
-    );
-    const parseResult = babelEslint.parseForESLint(
-      "type Foo = {}; function x(): Foo {}",
-      {
-        eslintVisitorKeys: true,
-        eslintScopeManager: true,
-      }
-    );
-    assert(parseResult.visitorKeys);
-    assert(parseResult.scopeManager);
-
-    const fooVariable = parseResult.scopeManager.getDeclaredVariables(
-      parseResult.ast.body[0]
-    )[0];
-
-    assert.strictEqual(fooVariable.references.length, 1);
   });
 });

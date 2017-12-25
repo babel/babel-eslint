@@ -1,7 +1,6 @@
 /*eslint-env mocha*/
 "use strict";
 var eslint = require("eslint");
-var oldEslint = require("eslint-old");
 var unpad = require("dedent");
 
 function verifyAndAssertMessagesWithSpecificESLint(
@@ -71,16 +70,14 @@ function verifyAndAssertMessages(
   sourceType,
   overrideConfig
 ) {
-  [new eslint.Linter(), new oldEslint.Linter()].forEach(linter => {
-    verifyAndAssertMessagesWithSpecificESLint(
-      code,
-      rules,
-      expectedMessages,
-      sourceType,
-      overrideConfig,
-      linter
-    );
-  });
+  verifyAndAssertMessagesWithSpecificESLint(
+    code,
+    rules,
+    expectedMessages,
+    sourceType,
+    overrideConfig,
+    new eslint.Linter()
+  );
 }
 
 describe("verify", () => {
