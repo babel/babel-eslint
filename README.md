@@ -41,6 +41,8 @@ columns is also retained so you can track down errors with ease.
 Basically `babel-eslint` exports an [`index.js`](/index.js) that a linter can use.
 It just needs to export a `parse` method that takes in a string of code and outputs an AST.
 
+*"ALL valid Babel code"* means you don't need to provide a `.babelrc` file. Under the hood it uses `Babylon` parser with *all* available syntax plug-ins enabled by default.
+
 ## Usage
 
 ### Supported ESLint versions
