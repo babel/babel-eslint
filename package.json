@@ -36,7 +36,14 @@
     "url": "https://github.com/babel/babel-eslint/issues"
   },
   "homepage": "https://github.com/babel/babel-eslint",
+  "peerDependencies": {
+    "@babel/code-frame": ">=7.0.0-beta.40",
+    "@babel/core": ">=7.0.0-beta.40",
+    "babylon": ">=7.0.0-beta.40",
+    "eslint": ">=4.14.0"
+  },
   "devDependencies": {
+    "@babel/core": "7.0.0-beta.40",
     "babel-eslint": "^8.0.0",
     "dedent": "^0.7.0",
     "eslint": "npm:eslint@4.13.1",
