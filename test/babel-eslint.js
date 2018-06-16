@@ -40,12 +40,12 @@ function parseAndAssertSame(code) {
     ecmaVersion: 2018,
     sourceType: "module",
   });
-  var babylonAST = babelEslint.parseForESLint(code, {
+  var babelAST = babelEslint.parseForESLint(code, {
     eslintVisitorKeys: true,
     eslintScopeManager: true,
   }).ast;
   try {
-    assertImplementsAST(esAST, babylonAST);
+    assertImplementsAST(esAST, babelAST);
   } catch (err) {
     var traversal = err.message.slice(3, err.message.indexOf(":"));
     err.message += unpad(`
@@ -55,17 +55,17 @@ function parseAndAssertSame(code) {
         colors: true,
       })}
       babel-eslint:
-      ${util.inspect(lookup(babylonAST, traversal, 2), {
+      ${util.inspect(lookup(babelAST, traversal, 2), {
         depth: err.depth,
         colors: true,
       })}
     `);
     throw err;
   }
-  // assert.equal(esAST, babylonAST);
+  // assert.equal(esAST, babAST);
 }
 
-describe("babylon-to-espree", () => {
+describe("babel-to-estree", () => {
   describe("compatibility", () => {
     it("should allow ast.analyze to be called without options", function() {
       var esAST = babelEslint.parseForESLint("`test`", {
@@ -259,31 +259,31 @@ describe("babylon-to-espree", () => {
   // Espree doesn't support the optional chaining operator yet
   it("optional chaining operator (token)", () => {
     const code = "foo?.bar";
-    var babylonAST = babelEslint.parseForESLint(code, {
+    var babelAST = babelEslint.parseForESLint(code, {
       eslintVisitorKeys: true,
       eslintScopeManager: true,
     }).ast;
-    assert.strictEqual(babylonAST.tokens[1].type, "Punctuator");
+    assert.strictEqual(babelAST.tokens[1].type, "Punctuator");
   });
 
   // Espree doesn't support the nullish coalescing operator yet
   it("nullish coalescing operator (token)", () => {
     const code = "foo ?? bar";
-    var babylonAST = babelEslint.parseForESLint(code, {
+    var babelAST = babelEslint.parseForESLint(code, {
       eslintVisitorKeys: true,
       eslintScopeManager: true,
     }).ast;
-    assert.strictEqual(babylonAST.tokens[1].type, "Punctuator");
+    assert.strictEqual(babelAST.tokens[1].type, "Punctuator");
   });
 
   // Espree doesn't support the pipeline operator yet
   it("pipeline operator (token)", () => {
     const code = "foo |> bar";
-    var babylonAST = babelEslint.parseForESLint(code, {
+    var babelAST = babelEslint.parseForESLint(code, {
       eslintVisitorKeys: true,
       eslintScopeManager: true,
     }).ast;
-    assert.strictEqual(babylonAST.tokens[1].type, "Punctuator");
+    assert.strictEqual(babelAST.tokens[1].type, "Punctuator");
   });
 
   it.skip("empty program with line comment", () => {

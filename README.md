@@ -81,8 +81,6 @@ Check out the [ESLint docs](http://eslint.org/docs/rules/) for all possible rule
 
 `sourceType` can be set to `'module'`(default) or `'script'` if your code isn't using ECMAScript modules.
 `allowImportExportEverywhere` can be set to true to allow import and export declarations to appear anywhere a statement is allowed if your build environment supports that. By default, import and export declarations can only appear at a program's top level.
-`codeFrame` can be set to false to disable the code frame in the reporter. This is useful since some eslint formatters don't play well with it.
-
 **.eslintrc**
 
 ```json
@@ -91,7 +89,6 @@ Check out the [ESLint docs](http://eslint.org/docs/rules/) for all possible rule
   "parserOptions": {
     "sourceType": "module",
     "allowImportExportEverywhere": false,
-    "codeFrame": false
   }
 }
 ```
