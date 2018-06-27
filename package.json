@@ -30,7 +30,7 @@
   "author": "Sebastian McKenzie <sebmck@gmail.com>",
   "license": "MIT",
   "engines": {
-    "node": ">=4"
+    "node": ">=6"
   },
   "bugs": {
     "url": "https://github.com/babel/babel-eslint/issues"
