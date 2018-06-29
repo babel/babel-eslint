@@ -476,7 +476,7 @@ describe("verify", () => {
       );
     });
 
-    it("polymorphpic types #109", () => {
+    it("polymorphic types #109", () => {
       verifyAndAssertMessages(
         "export default function groupByEveryN<T>(array: Array<T>, n: number): Array<Array<?T>> { n; }",
         { "no-unused-vars": 1, "no-undef": 1 }
@@ -494,7 +494,7 @@ describe("verify", () => {
       );
     });
 
-    it("polymorphpic/generic types for class #123", () => {
+    it("polymorphic/generic types for class #123", () => {
       verifyAndAssertMessages(
         `
           class Box<T> {
@@ -507,7 +507,7 @@ describe("verify", () => {
       );
     });
 
-    it("polymorphpic/generic types for function #123", () => {
+    it("polymorphic/generic types for function #123", () => {
       verifyAndAssertMessages(
         `
           export function identity<T>(value) {
@@ -518,7 +518,7 @@ describe("verify", () => {
       );
     });
 
-    it("polymorphpic/generic types for type alias #123", () => {
+    it("polymorphic/generic types for type alias #123", () => {
       verifyAndAssertMessages(
         `
           import Bar from './Bar';
@@ -528,7 +528,7 @@ describe("verify", () => {
       );
     });
 
-    it("polymorphpic/generic types - outside of fn scope #123", () => {
+    it("polymorphic/generic types - outside of fn scope #123", () => {
       verifyAndAssertMessages(
         `
           export function foo<T>(value) { value; };
@@ -542,7 +542,7 @@ describe("verify", () => {
       );
     });
 
-    it("polymorphpic/generic types - extending unknown #123", () => {
+    it("polymorphic/generic types - extending unknown #123", () => {
       verifyAndAssertMessages(
         `
           import Bar from 'bar';
@@ -553,7 +553,7 @@ describe("verify", () => {
       );
     });
 
-    it("polymorphpic/generic types - function calls", () => {
+    it("polymorphic/generic types - function calls", () => {
       verifyAndAssertMessages(
         `
           function f<T>(): T {}
