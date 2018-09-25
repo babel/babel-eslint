@@ -36,6 +36,9 @@
     "url": "https://github.com/babel/babel-eslint/issues"
   },
   "homepage": "https://github.com/babel/babel-eslint",
+  "peerDependencies": {
+    "eslint": ">= 4.12.1"
+  },
   "devDependencies": {
     "babel-eslint": "^8.2.6",
     "dedent": "^0.7.0",
