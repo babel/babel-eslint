@@ -31,6 +31,11 @@ Please check out [eslint-plugin-react](https://github.com/yannickcr/eslint-plugi
 
 Please check out [eslint-plugin-babel](https://github.com/babel/eslint-plugin-babel) for other issues
 
+TypeScript:
+> These issues is related to [eslint-plugin-typescript](https://github.com/nzakas/eslint-plugin-typescript).
+- `typescript/no-namespace`: Babel doesn't support TypeScript's namesapce.
+- `typescript/prefer-namespace-keyword`: Babel doesn't support TypeScript's namesapce.
+
 ## How does it work?
 
 ESLint allows custom parsers. This is great but some of the syntax nodes that Babel supports
