@@ -591,9 +591,9 @@ escape-string-regexp@1.0.5, escape-string-regexp@^1.0.2, escape-string-regexp@^1
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/escape-string-regexp/-/escape-string-regexp-1.0.5.tgz#1b61c0562190a8dff6ae3bb2cf0200ca130b86d4"
 
-eslint-config-babel@^7.0.1:
-  version "7.0.2"
-  resolved "https://registry.yarnpkg.com/eslint-config-babel/-/eslint-config-babel-7.0.2.tgz#cbde74f61cee087d8cd6e607fcfa087869a02d99"
+eslint-config-babel@^8.0.1:
+  version "8.0.1"
+  resolved "https://registry.yarnpkg.com/eslint-config-babel/-/eslint-config-babel-8.0.1.tgz#394a1d24aa9f725a2d33c43d33dddd5bdae89f79"
 
 eslint-import-resolver-node@^0.3.1:
   version "0.3.2"
