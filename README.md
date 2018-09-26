@@ -32,7 +32,7 @@ Please check out [eslint-plugin-react](https://github.com/yannickcr/eslint-plugi
 Please check out [eslint-plugin-babel](https://github.com/babel/eslint-plugin-babel) for other issues
 
 TypeScript:
-> These issues is related to [eslint-plugin-typescript](https://github.com/nzakas/eslint-plugin-typescript).
+> These issues are related to [eslint-plugin-typescript](https://github.com/nzakas/eslint-plugin-typescript).
 - `typescript/no-namespace`: Babel doesn't support TypeScript's namesapce.
 - `typescript/prefer-namespace-keyword`: Babel doesn't support TypeScript's namesapce.
 
@@ -88,7 +88,7 @@ Check out the [ESLint docs](http://eslint.org/docs/rules/) for all possible rule
 - `allowImportExportEverywhere` (default `false`) can be set to `true` to allow import and export declarations to appear anywhere a statement is allowed if your build environment supports that. Otherwise import and export declarations can only appear at a program's top level.
 - `codeFrame` (default `true`) can be set to `false` to disable the code frame in the reporter. This is useful since some eslint formatters don't play well with it.
 - `plugins` is an array which let you add more babel parser syntax plugins. Note that most of plugins are enabled by default, so you don't need to add something explicitly. You can enable `typescript` plugin via this option, and the `flow` plugin will be disabled automatically.
-- `excludePlugins` is an array which let you disable some plugins. One possible use case is that you don't want to use one experimental ECMAScript feature accidently. Note that you don't need to disable `flow` plugin if you have enabled `typescript` plugin.
+- `excludePlugins` is an array which let you disable some plugins. One possible use case is that you don't want to use one experimental ECMAScript feature accidentally. Note that you don't need to disable `flow` plugin if you have enabled `typescript` plugin.
 
 **.eslintrc**
 
