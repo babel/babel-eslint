@@ -12,7 +12,7 @@ function verifyAndAssertMessagesWithSpecificESLint(
   linter
 ) {
   const config = {
-    parser: require.resolve(".."),
+    parser: require.resolve("../.."),
     rules,
     env: {
       node: true,

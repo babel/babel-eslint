@@ -6,14 +6,14 @@ const fs = require("fs");
 const path = require("path");
 
 const paths = {
-  fixtures: path.join(__dirname, "fixtures", "rules"),
+  fixtures: path.join(__dirname, "..", "fixtures", "rules"),
 };
 
 const encoding = "utf8";
 const errorLevel = 2;
 
 const baseEslintOpts = {
-  parser: require.resolve(".."),
+  parser: require.resolve("../.."),
   parserOptions: {
     sourceType: "script",
   },

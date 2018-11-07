@@ -14,9 +14,9 @@
   "homepage": "https://github.com/babel/babel-eslint",
   "scripts": {
     "test": "npm run lint && npm run test-only",
-    "test-only": "mocha && mocha --require test/fixtures/preprocess-to-patch.js",
-    "lint": "eslint lib test",
-    "fix": "eslint lib test --fix",
+    "test-only": "cd test && mocha --require fixtures/preprocess-to-patch.js specs && cd -",
+    "lint": "eslint .",
+    "lint-fix": "npm run lint -- --fix",
     "precommit": "lint-staged",
     "preversion": "npm test",
     "changelog": "git log `git describe --tags --abbrev=0`..HEAD --pretty=format:' * %s (%an)' | grep -v 'Merge pull request'"
