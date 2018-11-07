@@ -19,11 +19,10 @@ function verifyAndAssertMessagesWithSpecificESLint(
       es6: true,
     },
     parserOptions: {
-      ecmaVersion: 2018,
+      sourceType,
       ecmaFeatures: {
         globalReturn: true,
       },
-      sourceType,
     },
   };
 
