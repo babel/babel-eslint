@@ -21,8 +21,6 @@ function verifyAndAssertMessagesWithSpecificESLint(
     parserOptions: {
       ecmaVersion: 2018,
       ecmaFeatures: {
-        jsx: true,
-        experimentalObjectRestSpread: true,
         globalReturn: true,
       },
       sourceType,
@@ -1155,9 +1153,6 @@ describe("verify", () => {
     ) {
       const overrideConfig = {
         parserOptions: {
-          ecmaFeatures: {
-            legacyDecorators: true,
-          },
           sourceType,
         },
       };
