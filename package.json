@@ -29,17 +29,16 @@
     "lib"
   ],
   "peerDependencies": {
-    "@babel/core": ">=7.1.5",
-    "@babel/parser": ">=7.1.5",
+    "@babel/core": ">=7.2.0",
     "eslint": ">= 4.12.1"
   },
   "dependencies": {
     "eslint-scope": "3.7.1",
-    "eslint-visitor-keys": "^1.0.0"
+    "eslint-visitor-keys": "^1.0.0",
+    "semver": "^5.6.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.1.5",
-    "@babel/parser": "^7.1.5",
+    "@babel/core": "^7.2.0",
     "@babel/plugin-proposal-class-properties": "^7.1.0",
     "@babel/plugin-proposal-decorators": "^7.1.2",
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.0.0",
