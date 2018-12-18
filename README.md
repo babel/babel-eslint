@@ -18,15 +18,19 @@ For questions and support please visit the [`#discussion`](https://babeljs.slack
 ## Known Issues
 
 Flow:
+
 > Check out [eslint-plugin-flowtype](https://github.com/gajus/eslint-plugin-flowtype): An `eslint` plugin that makes flow type annotations global variables and marks declarations as used. Solves the problem of false positives with `no-undef` and `no-unused-vars`.
+
 - `no-undef` for global flow types: `ReactElement`, `ReactClass` [#130](https://github.com/babel/babel-eslint/issues/130#issuecomment-111215076)
   - Workaround: define types as globals in `.eslintrc` or define types and import them `import type ReactElement from './types'`
 - `no-unused-vars/no-undef` with Flow declarations (`declare module A {}`) [#132](https://github.com/babel/babel-eslint/issues/132#issuecomment-112815926)
 
 Modules/strict mode
+
 - `no-unused-vars: [2, {vars: local}]` [#136](https://github.com/babel/babel-eslint/issues/136)
 
 Please check out [eslint-plugin-react](https://github.com/yannickcr/eslint-plugin-react) for React/JSX issues
+
 - `no-unused-vars` with jsx
 
 Please check out [eslint-plugin-babel](https://github.com/babel/eslint-plugin-babel) for other issues
@@ -45,12 +49,12 @@ It just needs to export a `parse` method that takes in a string of code and outp
 
 ### Supported ESLint versions
 
-ESLint | babel-eslint
------------- | -------------
-4.x | >= 6.x
-3.x | >= 6.x
-2.x | >= 6.x
-1.x | >= 5.x
+| ESLint | babel-eslint |
+| ------ | ------------ |
+| 4.x    | >= 6.x       |
+| 3.x    | >= 6.x       |
+| 2.x    | >= 6.x       |
+| 1.x    | >= 5.x       |
 
 ### Install
 
@@ -80,6 +84,7 @@ Check out the [ESLint docs](http://eslint.org/docs/rules/) for all possible rule
 ### Configuration
 
 - `sourceType` can be set to `'module'`(default) or `'script'` if your code isn't using ECMAScript modules.
+- `configFile` Optional. If not defined, babel-eslint will use Babel's default configuration file resolution logic. Otherwise, it will use the path to config file given as a string here. See [Babel's documentation](https://babeljs.io/docs/en/options#configfile) for more details.
 - `allowImportExportEverywhere` (default `false`) can be set to `true` to allow import and export declarations to appear anywhere a statement is allowed if your build environment supports that. Otherwise import and export declarations can only appear at a program's top level.
 - `ecmaFeatures.globalReturn` (default `false`) allow return statements in the global scope when used with `sourceType: "script"`.
 
@@ -90,9 +95,10 @@ Check out the [ESLint docs](http://eslint.org/docs/rules/) for all possible rule
   "parser": "babel-eslint",
   "parserOptions": {
     "sourceType": "module",
+    "configFile": "path/to/config.js",
     "allowImportExportEverywhere": false,
     "ecmaFeatures": {
-      "globalReturn": false 
+      "globalReturn": false
     }
   }
 }
