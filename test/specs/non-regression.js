@@ -1,6 +1,7 @@
 "use strict";
 
 const eslint = require("eslint");
+const path = require("path");
 const unpad = require("dedent");
 
 function verifyAndAssertMessagesWithSpecificESLint(
@@ -1153,6 +1154,10 @@ describe("verify", () => {
       const overrideConfig = {
         parserOptions: {
           sourceType,
+          configFile: path.resolve(
+            __dirname,
+            "../fixtures/config/babel.config.decorators-legacy.js"
+          ),
         },
       };
       return verifyAndAssertMessages(
