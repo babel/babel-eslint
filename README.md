@@ -68,40 +68,42 @@ $ yarn add eslint@4.x babel-eslint@8 -D
 
 ### Setup
 
-**.eslintrc**
+**.eslintrc.js**
 
-```json
-{
-  "parser": "babel-eslint",
-  "rules": {
-    "strict": 0
+```js
+module.exports = {
+  parser: "babel-eslint",
+  rules: {
+    strict: "off"
   }
-}
+};
 ```
 
 Check out the [ESLint docs](http://eslint.org/docs/rules/) for all possible rules.
 
 ### Configuration
 
-- `sourceType` can be set to `'module'`(default) or `'script'` if your code isn't using ECMAScript modules.
-- `configFile` If defined, it will use the path to config file given as a string here. Otherwise, babel-eslint will use Babel's default configuration file resolution logic. See [Babel's documentation](https://babeljs.io/docs/en/options#configfile) for more details.
+- `sourceType` can be set to `"module"`(default) or `"script"` if your code isn't using ECMAScript modules.
 - `allowImportExportEverywhere` (default `false`) can be set to `true` to allow import and export declarations to appear anywhere a statement is allowed if your build environment supports that. Otherwise import and export declarations can only appear at a program's top level.
 - `ecmaFeatures.globalReturn` (default `false`) allow return statements in the global scope when used with `sourceType: "script"`.
+- `babelOptions` passes through Babel's configuration [loading](https://babeljs.io/docs/en/options#config-loading-options) and [merging](https://babeljs.io/docs/en/options#config-merging-options) options (for instance, in case of a monorepo). When not defined, babel-eslint will use Babel's default configuration file resolution logic.
 
-**.eslintrc.json**
+**.eslintrc.js**
 
-```json
-{
-  "parser": "babel-eslint",
-  "parserOptions": {
-    "sourceType": "module",
-    "configFile": "path/to/config.js",
-    "allowImportExportEverywhere": false,
-    "ecmaFeatures": {
-      "globalReturn": false
+```js
+module.exports = {
+  parser: "babel-eslint",
+  parserOptions: {
+    sourceType: "module",
+    allowImportExportEverywhere: false,
+    ecmaFeatures: {
+      globalReturn: false
+    },
+    babelOptions: {
+      configFile: "path/to/config.js"
     }
   }
-}
+};
 ```
 
 ### Run

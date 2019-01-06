@@ -1154,10 +1154,12 @@ describe("verify", () => {
       const overrideConfig = {
         parserOptions: {
           sourceType,
-          configFile: path.resolve(
-            __dirname,
-            "../fixtures/config/babel.config.decorators-legacy.js"
-          ),
+          babelOptions: {
+            configFile: path.resolve(
+              __dirname,
+              "../fixtures/config/babel.config.decorators-legacy.js"
+            ),
+          },
         },
       };
       return verifyAndAssertMessages(
