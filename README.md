@@ -23,24 +23,15 @@ Note that ESLint's core rules do not support experimental syntax and may therefo
 
 ## Usage
 
-### Supported ESLint versions
-
-| ESLint | babel-eslint |
-| ------ | ------------ |
-| 4.x    | >= 6.x       |
-| 3.x    | >= 6.x       |
-| 2.x    | >= 6.x       |
-| 1.x    | >= 5.x       |
-
-### Install
-
-Ensure that you have substituted the correct version lock for `eslint` and `babel-eslint` into this command:
+### Installation
 
 ```sh
-$ npm install eslint@4.x babel-eslint@8 --save-dev
+$ npm install eslint babel-eslint --save-dev
 # or
-$ yarn add eslint@4.x babel-eslint@8 -D
+$ yarn add eslint babel-eslint -D
 ```
+
+**Note:** babel-eslint requires `babel/core@>=7.2.0` and a valid Babel configuration file to run. If you do have this already set up, please see the [Babel Usage Guide](https://babeljs.io/docs/en/usage).
 
 ### Setup
 
