@@ -31,7 +31,7 @@ $ npm install eslint babel-eslint --save-dev
 $ yarn add eslint babel-eslint -D
 ```
 
-**Note:** babel-eslint requires `babel/core@>=7.2.0` and a valid Babel configuration file to run. If you do have this already set up, please see the [Babel Usage Guide](https://babeljs.io/docs/en/usage).
+**Note:** babel-eslint requires `babel/core@>=7.2.0` and a valid Babel configuration file to run. If you do not have this already set up, please see the [Babel Usage Guide](https://babeljs.io/docs/en/usage).
 
 ### Setup
 
