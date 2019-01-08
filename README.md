@@ -77,7 +77,7 @@ module.exports = {
 ### Run
 
 ```sh
-$ eslint your-files-here
+$ ./node_modules/.bin/eslint yourfile.js
 ```
 
 ## Known issues
