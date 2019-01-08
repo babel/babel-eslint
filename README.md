@@ -19,7 +19,7 @@ ESLint allows for the use of [custom parsers](https://eslint.org/docs/developer-
 transformed into an [ESTree](https://github.com/estree/estree)-compliant structure that ESLint can understand. All location info such as line numbers,
 columns is also retained so you can track down errors with ease.
 
-Note that ESLint's core rules do not support experimental syntax and may therefore not work as expected when using babel-eslint. Please use the companion [`eslint-plugin-babel`](https://github.com/babel/eslint-plugin-babel) plugin for core rules that you have issues with.
+**Note:** ESLint's core rules do not support experimental syntax and may therefore not work as expected when using babel-eslint. Please use the companion [`eslint-plugin-babel`](https://github.com/babel/eslint-plugin-babel) plugin for core rules that you have issues with.
 
 ## Usage
 
@@ -45,7 +45,9 @@ module.exports = {
 };
 ```
 
-With the parser set, your configuration can be configured as described in the [Configuring ESLint](https://eslint.org/docs/user-guide/configuring) documentation. Note that the `parserOptions` described in the [official documentation](https://eslint.org/docs/user-guide/configuring#specifying-parser-options) are for the default parser and are not necessarily supported by babel-eslint. Please see the section directly below for supported `parserOptions`.
+With the parser set, your configuration can be configured as described in the [Configuring ESLint](https://eslint.org/docs/user-guide/configuring) documentation.
+
+**Note:** The `parserOptions` described in the [official documentation](https://eslint.org/docs/user-guide/configuring#specifying-parser-options) are for the default parser and are not necessarily supported by babel-eslint. Please see the section directly below for supported `parserOptions`.
 
 ### Additional parser configuration
 
