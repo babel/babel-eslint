@@ -2,45 +2,13 @@
 
 const assert = require("assert");
 const babelEslint = require("../..");
-const espree = require("espree");
 const escope = require("eslint-scope");
-const unpad = require("dedent");
-const assertImplementsAST = require("../helpers/assert-implements-ast");
-
-function parseAndAssertSame(code) {
-  code = unpad(code);
-  const esAST = espree.parse(code, {
-    ecmaFeatures: {
-      // enable JSX parsing
-      jsx: true,
-      // enable return in global scope
-      globalReturn: true,
-      // enable implied strict mode (if ecmaVersion >= 5)
-      impliedStrict: true,
-      // allow experimental object rest/spread
-      experimentalObjectRestSpread: true,
-    },
-    tokens: true,
-    loc: true,
-    range: true,
-    comment: true,
-    ecmaVersion: 2018,
-    sourceType: "module",
-  });
-  const babylonAST = babelEslint.parseForESLint(code, {
-    eslintVisitorKeys: true,
-    eslintScopeManager: true,
-  }).ast;
-  assertImplementsAST(esAST, babylonAST);
-}
+const { parseAndAssertSame } = require("../helpers");
 
 describe("babylon-to-espree", () => {
   describe("compatibility", () => {
     it("should allow ast.analyze to be called without options", function() {
-      const esAST = babelEslint.parseForESLint("`test`", {
-        eslintScopeManager: true,
-        eslintVisitorKeys: true,
-      }).ast;
+      const esAST = babelEslint.parseForESLint("`test`").ast;
 
       assert.doesNotThrow(
         () => {
@@ -240,30 +208,21 @@ describe("babylon-to-espree", () => {
   // Espree doesn't support the optional chaining operator yet
   it("optional chaining operator (token)", () => {
     const code = "foo?.bar";
-    const babylonAST = babelEslint.parseForESLint(code, {
-      eslintVisitorKeys: true,
-      eslintScopeManager: true,
-    }).ast;
+    const babylonAST = babelEslint.parseForESLint(code).ast;
     assert.strictEqual(babylonAST.tokens[1].type, "Punctuator");
   });
 
   // Espree doesn't support the nullish coalescing operator yet
   it("nullish coalescing operator (token)", () => {
     const code = "foo ?? bar";
-    const babylonAST = babelEslint.parseForESLint(code, {
-      eslintVisitorKeys: true,
-      eslintScopeManager: true,
-    }).ast;
+    const babylonAST = babelEslint.parseForESLint(code).ast;
     assert.strictEqual(babylonAST.tokens[1].type, "Punctuator");
   });
 
   // Espree doesn't support the pipeline operator yet
   it("pipeline operator (token)", () => {
     const code = "foo |> bar";
-    const babylonAST = babelEslint.parseForESLint(code, {
-      eslintVisitorKeys: true,
-      eslintScopeManager: true,
-    }).ast;
+    const babylonAST = babelEslint.parseForESLint(code).ast;
     assert.strictEqual(babylonAST.tokens[1].type, "Punctuator");
   });
 
