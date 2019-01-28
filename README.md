@@ -84,7 +84,7 @@ This configuration would use the default parser for all files except for those f
 ```js
 module.exports = {
   rules: {
-    indent: 'error'
+    indent: "error"
   },
   overrides: [
     {
