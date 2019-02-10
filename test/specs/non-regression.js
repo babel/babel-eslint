@@ -815,10 +815,9 @@ describe("verify", () => {
     it("22", () => {
       verifyAndAssertMessages(
         `
-          import type Foo from 'foo';
+          import type Foo1 from 'foo';
           import type Foo2 from 'foo';
-          import type Foo3 from 'foo';
-          var a: { id<Foo>(x: Foo2): Foo3; }; a;
+          var a: { id(x: Foo1): Foo2; }; a;
         `,
         { "no-unused-vars": 1, "no-undef": 1 }
       );
@@ -970,11 +969,10 @@ describe("verify", () => {
     it("37", () => {
       verifyAndAssertMessages(
         `
-          import type Foo from 'foo';
+          import type Foo1 from 'foo';
           import type Foo2 from 'foo';
           import type Foo3 from 'foo';
-          import type Foo4 from 'foo';
-          var a: <Foo>(x: Foo2, ...y:Foo3[]) => Foo4; a;
+          var a: (x: Foo1, ...y: Foo2[]) => Foo3; a;
         `,
         { "no-unused-vars": 1, "no-undef": 1 }
       );
@@ -1096,6 +1094,17 @@ describe("verify", () => {
       verifyAndAssertMessages(
         `
           opaque type Foo = number;
+        `,
+        { "no-undef": 1 }
+      );
+    });
+
+    it("generic function annotations", () => {
+      verifyAndAssertMessages(
+        `
+          var foo: <T>(x: T) => T;
+          type Foo = { foo<T>(x: T): T };
+          type Bar = { foo: <T>(x: T) => T };
         `,
         { "no-undef": 1 }
       );
