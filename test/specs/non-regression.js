@@ -1089,6 +1089,15 @@ describe("verify", () => {
         { "no-unused-vars": 1, "no-undef": 1 }
       );
     });
+
+    it("opaque type aliases", () => {
+      verifyAndAssertMessages(
+        `
+          opaque type Foo = number;
+        `,
+        { "no-undef": 1 }
+      );
+    });
   });
 
   it("class usage", () => {
