@@ -573,14 +573,16 @@ describe("verify", () => {
       );
     });
 
-    it("support declarations #132", () => {
+    it("support declarations #132, #625", () => {
       verifyAndAssertMessages(
         `
           declare class A { static () : number }
           declare module B { declare var x: number; }
           declare function foo<T>(): void;
-          declare var bar
-          A; B; foo(); bar;
+          declare var bar;
+          declare type Foo = number;
+          declare interface IFoo {}
+          A; B; foo<Foo>(); bar; class FooImpl implements IFoo {}; new FooImpl();
         `,
         { "no-undef": 1, "no-unused-vars": 1 }
       );
