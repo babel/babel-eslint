@@ -1089,6 +1089,19 @@ describe("verify", () => {
         { "no-unused-vars": 1, "no-undef": 1 }
       );
     });
+
+    it("parses internal slot", () => {
+      verifyAndAssertMessages(
+        `
+          type F = {
+            (): string,
+            (x: boolean): string,
+            [[call]](x: number): string,
+            [[call]]: string => string,
+          };
+        `
+      );
+    });
   });
 
   it("class usage", () => {
