@@ -1830,6 +1830,14 @@ describe("verify", () => {
     );
   });
 
+  it("works with classPrivateMethods", () => {
+    verifyAndAssertMessages(
+      `
+        class A { #c() {} }
+      `
+    );
+  });
+
   it("works with optionalCatchBinding", () => {
     verifyAndAssertMessages(
       `
