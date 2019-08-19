@@ -281,3 +281,30 @@ function strictSuite() {
     });
   });
 }
+
+describe("no-unused-vars", () => {
+  const ruleId = "no-unused-vars";
+  const eslintOpts = Object.assign({}, baseEslintOpts, {
+    rules: {},
+  });
+  eslintOpts.rules[ruleId] = [errorLevel, "never"];
+
+  it("should not detect false positives inside for loop", () => {
+    const src =
+      "const nodeList = []; const visit = () => {}; for (const node of nodeList) { visit(node); }";
+
+    const report = eslint.linter.verify(src, eslintOpts);
+
+    assert(report.length === 0);
+  });
+
+  it("should detect unused var inside for loop", () => {
+    const src =
+      "const nodeList = []; const visit = () => {}; for (const node of nodeList) { visit(); }";
+
+    const report = eslint.linter.verify(src, eslintOpts);
+
+    assert(report.length === 1);
+    assert(report[0].ruleId === ruleId);
+  });
+});
