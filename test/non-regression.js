@@ -3,6 +3,8 @@
 var eslint = require("eslint");
 var unpad = require("dedent");
 
+var parser = require("../lib");
+
 function verifyAndAssertMessagesWithSpecificESLint(
   code,
   rules,
@@ -12,7 +14,7 @@ function verifyAndAssertMessagesWithSpecificESLint(
   linter
 ) {
   var config = {
-    parser: require.resolve(".."),
+    parser: "current-babel-eslint",
     rules,
     env: {
       node: true,
@@ -68,13 +70,16 @@ function verifyAndAssertMessages(
   sourceType,
   overrideConfig
 ) {
+  var linter = new eslint.Linter();
+  linter.defineParser("current-babel-eslint", parser);
+
   verifyAndAssertMessagesWithSpecificESLint(
     unpad(`${code}`),
     rules || {},
     expectedMessages || [],
     sourceType,
     overrideConfig,
-    new eslint.Linter()
+    linter
   );
 }
 

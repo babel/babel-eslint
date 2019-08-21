@@ -3,6 +3,10 @@ var eslint = require("eslint");
 var fs = require("fs");
 var path = require("path");
 
+var parser = require("../lib");
+
+eslint.linter.defineParser("current-babel-eslint", parser);
+
 var paths = {
   fixtures: path.join(__dirname, "fixtures", "rules"),
 };
@@ -11,7 +15,7 @@ var encoding = "utf8";
 var errorLevel = 2;
 
 var baseEslintOpts = {
-  parser: require.resolve(".."),
+  parser: "current-babel-eslint",
   parserOptions: {
     sourceType: "script",
   },

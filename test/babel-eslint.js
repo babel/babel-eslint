@@ -261,11 +261,11 @@ describe("babylon-to-espree", () => {
   });
 
   it("export named", () => {
-    parseAndAssertSame("export { foo };");
+    parseAndAssertSame("var foo = 1;export { foo };");
   });
 
   it("export named alias", () => {
-    parseAndAssertSame("export { foo as bar };");
+    parseAndAssertSame("var foo = 1;export { foo as bar };");
   });
 
   // Espree doesn't support the optional chaining operator yet
@@ -468,12 +468,6 @@ describe("babylon-to-espree", () => {
 
     it("return outside function", () => {
       parseAndAssertSame("return;");
-    });
-
-    it("super outside method", () => {
-      assert.throws(() => {
-        parseAndAssertSame("function F() { super(); }");
-      }, /SyntaxError: 'super' keyword outside a method/);
     });
 
     it("StringLiteral", () => {
