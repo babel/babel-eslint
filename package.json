@@ -17,7 +17,6 @@
     "test-only": "cd test && mocha specs && cd -",
     "lint": "eslint .",
     "lint-fix": "npm run lint -- --fix",
-    "precommit": "lint-staged",
     "preversion": "npm test",
     "changelog": "git log `git describe --tags --abbrev=0`..HEAD --pretty=format:' * %s (%an)' | grep -v 'Merge pull request'"
   },
@@ -69,5 +68,10 @@
       "eslint --format=codeframe --fix",
       "git add"
     ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   }
 }
