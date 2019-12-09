@@ -298,7 +298,7 @@ describe("babylon-to-espree", () => {
     assert.strictEqual(babylonAST.tokens[1].type, "Punctuator");
   });
 
-  // Espree doesn't support Flow enums yet
+  // Espree doesn't support Flow enums
   it("flow enums", () => {
     const code = "enum E {A, B}";
     const babylonAST = babelEslint.parseForESLint(code, {
