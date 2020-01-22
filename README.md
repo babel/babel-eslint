@@ -3,9 +3,15 @@
 **babel-eslint** allows you to lint **ALL** valid Babel code with the fantastic
 [ESLint](https://github.com/eslint/eslint).
 
-## Breaking change in v11.x.x
+## Breaking changes in v11.x.x
 
 As of the v11.x.x release, babel-eslint now requires Babel as a peer dependency and expects a valid [Babel configuration file](https://babeljs.io/docs/en/configuration) to exist. This ensures that the same Babel configuration is used during both linting and compilation.
+
+v11 also changes some AST node types to match espree v6:
+
+- `ExperimentalSpreadProperty` became `SpreadElement`.
+- `ExperimentalRestProperty` became `RestElement`.
+- `Literal` became `JSXText` (for JSXText).
 
 ## When should I use babel-eslint?
 
