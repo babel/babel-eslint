@@ -229,6 +229,19 @@ describe("verify", () => {
       );
     });
 
+    it("enum declaration", () => {
+      verifyAndAssertMessages(
+        `
+          enum E {
+            A,
+            B,
+          }
+          E.A;
+        `,
+        { "no-unused-vars": 1, "no-undef": 1 }
+      );
+    });
+
     it("type parameter bounds (classes)", () => {
       verifyAndAssertMessages(
         `
