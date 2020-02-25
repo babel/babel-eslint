@@ -237,8 +237,13 @@ describe("verify", () => {
             B,
           }
           E.A;
+          enum UnusedEnum {
+            A,
+            B,
+          }
         `,
-        { "no-unused-vars": 1, "no-undef": 1 }
+        { "no-unused-vars": 1, "no-undef": 1 },
+        ["6:6 'UnusedEnum' is defined but never used. no-unused-vars"]
       );
     });
 
