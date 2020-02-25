@@ -261,11 +261,11 @@ describe("babylon-to-espree", () => {
   });
 
   it("export named", () => {
-    parseAndAssertSame("export { foo };");
+    parseAndAssertSame("const foo = 1; export { foo };");
   });
 
   it("export named alias", () => {
-    parseAndAssertSame("export { foo as bar };");
+    parseAndAssertSame("const foo = 1; export { foo as bar };");
   });
 
   // Espree doesn't support the optional chaining operator yet
@@ -296,6 +296,16 @@ describe("babylon-to-espree", () => {
       eslintScopeManager: true,
     }).ast;
     assert.strictEqual(babylonAST.tokens[1].type, "Punctuator");
+  });
+
+  // Espree doesn't support Flow enums
+  it("flow enums", () => {
+    const code = "enum E {A, B}";
+    const babylonAST = babelEslint.parseForESLint(code, {
+      eslintVisitorKeys: true,
+      eslintScopeManager: true,
+    }).ast;
+    assert.strictEqual(babylonAST.body[0].type, "EnumDeclaration");
   });
 
   it.skip("empty program with line comment", () => {

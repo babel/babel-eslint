@@ -229,6 +229,24 @@ describe("verify", () => {
       );
     });
 
+    it("enum declaration", () => {
+      verifyAndAssertMessages(
+        `
+          enum E {
+            A,
+            B,
+          }
+          E.A;
+          enum UnusedEnum {
+            A,
+            B,
+          }
+        `,
+        { "no-unused-vars": 1, "no-undef": 1 },
+        ["6:6 'UnusedEnum' is defined but never used. no-unused-vars"]
+      );
+    });
+
     it("type parameter bounds (classes)", () => {
       verifyAndAssertMessages(
         `
