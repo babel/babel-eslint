@@ -1,6 +1,6 @@
 # babel-eslint [![npm](https://img.shields.io/npm/v/babel-eslint.svg)](https://www.npmjs.com/package/babel-eslint) [![travis](https://img.shields.io/travis/babel/babel-eslint/master.svg)](https://travis-ci.org/babel/babel-eslint) [![npm-downloads](https://img.shields.io/npm/dm/babel-eslint.svg)](https://www.npmjs.com/package/babel-eslint)
 
-## NOTE: babel-eslint is now `@babel/eslint-parser` and has moved into the [Babel monorepo](https://github.com/babel/babel/tree/master/eslint/babel-eslint-parser).
+## NOTE: babel-eslint is now `@babel/eslint-parser` and has moved into the [Babel monorepo](https://github.com/babel/babel/tree/main/eslint/babel-eslint-parser).
 
 **babel-eslint** allows you to lint **ALL** valid Babel code with the fantastic
 [ESLint](https://github.com/eslint/eslint).
